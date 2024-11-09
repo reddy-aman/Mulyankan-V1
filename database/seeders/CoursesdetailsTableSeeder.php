@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class CoursesdetailsTableSeeder extends Seeder
 {
+
     public function run()
     {
         $data = [
