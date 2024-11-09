@@ -45,7 +45,6 @@
     </script>
 @endif
 
-amanana
 
  <!-- Your Courses start -->
 
