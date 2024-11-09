@@ -14,7 +14,6 @@
 
 
 /* Optional: Adjust for smaller screens */
-/* aman */
 @media (max-width: 3600px) {
   .Courses-card {
     padding-top: 6%;
