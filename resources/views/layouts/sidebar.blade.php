@@ -1,5 +1,6 @@
 {{-- side bar start --}}
-<link rel="stylesheet" href="../font-awesome-4.7.0/css/font-awesome.min.css">
+
+<!-- <link rel="stylesheet" href="/mulyankan/font-awesome-4.7.0/css/font-awesome.min.css"> -->
 
 <aside id="logo-sidebar"
    class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
@@ -77,5 +78,7 @@
       </ul>
    </div>
 </aside>
+
+
 
 {{-- side bar close --}}
