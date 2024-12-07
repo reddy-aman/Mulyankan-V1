@@ -33,7 +33,7 @@ Route::group(['prefix'=>'mulyankan','middleware'=>'auth'],function(){
     Route::put('{course}', [MulyankanCoursesController::class, 'update'])->middleware('role:Student|Instructor')->name('update');
 
     // Profile routes for authenticated users
-    
+    // wait
     // Route::get('/profile', [ProfileController::class, 'edit'])->middleware('role:Instructor')->name('profile.edit');
     // Route::patch('profile/change/password', [ProfileController::class, 'update'])->middleware('role:Instructor')->name('profile.update');
     // Route::delete('/profile', action: [ProfileController::class, 'destroy'])->middleware('role:Instructor')->name('profile.destroy');
