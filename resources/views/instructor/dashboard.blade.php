@@ -12,6 +12,7 @@
   }
 }
 
+
 /* Optional: Adjust for smaller screens */
 @media (max-width: 3600px) {
   .Courses-card {

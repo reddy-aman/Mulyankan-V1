@@ -10,12 +10,12 @@ class CreateCoursesTable extends Migration
     {
         Schema::create('courses', function (Blueprint $table) {
             $table->id();
-            $table->string('course_number', 6)->unique(); // e.g., AI201
-            $table->string('entry_code', 6)->unique(); // 6-character code
+            $table->string('course_number', 256)->unique(); // e.g., AI201
+            $table->string('entry_code', 6)->unique()->nullable(); // 6-character code
             $table->string('course_name');
             $table->text('course_description');
             $table->string('term')->nullable();
-            $table->year(column: 'year')->nullable();
+            $table->string(column: 'year')->nullable();
             $table->string('department')->nullable();
             $table->foreignId('instructor_id')->constrained('users'); // Assuming instructor is stored in users table
             $table->timestamps();

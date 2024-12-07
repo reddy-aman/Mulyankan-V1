@@ -5,8 +5,9 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class AttributesTableSeeder extends Seeder
+class CoursesdetailsTableSeeder extends Seeder
 {
+
     public function run()
     {
         $data = [
