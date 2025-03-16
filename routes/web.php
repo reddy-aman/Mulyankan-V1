@@ -31,6 +31,13 @@ Route::group(['prefix'=>'mulyankan','middleware'=>'auth'],function(){
     Route::post('/add/courses', [MulyankanCoursesController::class, 'store'])->middleware('role:Student|Instructor')->name('courses.store');
     Route::get('{course}/edit', [MulyankanCoursesController::class, 'edit'])->middleware('role:Student|Instructor')->name('edit');
     Route::put('{course}', [MulyankanCoursesController::class, 'update'])->middleware('role:Student|Instructor')->name('update');
+    Route::get('/courses/{id}', [MulyankanCoursesController::class, 'show'])->middleware('role:Student|Instructor')->name('courses.show');
+    Route::get('/courses/{id}/roster', [MulyankanCoursesController::class, 'showRoster'])->middleware('role:Student|Instructor')->name('courses.roster');
+    Route::post('/courses/add-user', [MulyankanCoursesController::class, 'addUser'])->middleware('role:Student|Instructor')->name('courses.addUser');
+    Route::post('/courses/upload-csv', [MulyankanCoursesController::class, 'uploadCSV'])->middleware('role:Student|Instructor')->name('courses.uploadCSV');
+    Route::get('/courses/rosterDownload/{id}', [MulyankanCoursesController::class, 'rosterDownload'])->middleware('role:Student|Instructor')->name('courses.rosterDownload');
+    Route::post('/courses/{id}/editUser', [MulyankanCoursesController::class, 'editUser'])->middleware('role:Student|Instructor')->name('courses.editUser');
+    Route::delete('/courses/deleteUser/{id}', [MulyankanCoursesController::class, 'deleteUser'])->name('courses.deleteUser');
 
     // Profile routes for authenticated users
     // wait
