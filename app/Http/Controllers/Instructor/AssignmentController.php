@@ -26,90 +26,12 @@ class AssignmentController extends Controller
         return view('assignments.index', compact('course', 'assignments', 'isInstructor'));
     }
 
-    public function create($courseNo)
+    public function create($course_id)
     {
-        $this->authorizeInstructor(); // Ensure only instructor
+        // $this->authorizeInstructor(); // Ensure only instructor
 
-        $course = Course::where('course_no', $courseNo)->firstOrFail();
-        return view('assignments.create', compact('course'));
-    }
-
-    public function store(Request $request, $courseNo)
-    {
-        $this->authorizeInstructor();
-
-        $course = Course::where('course_no', $courseNo)->firstOrFail();
-        $data = $request->validate([
-            'title'         => 'required|string|max:255',
-            'points'        => 'nullable|integer',
-            'release_date'  => 'nullable|date',
-            'due_date'      => 'nullable|date',
-        ]);
-
-        $data['course_id'] = $course->id;
-        Assignment::create($data);
-
-        return redirect()
-            ->route('courses.assignments.index', $courseNo)
-            ->with('success', 'Assignment created successfully.');
-    }
-
-    public function show($courseNo, $assignmentId)
-    {
-        $course = Course::where('course_no', $courseNo)->firstOrFail();
-        $assignment = Assignment::where('course_id', $course->id)
-                                ->where('id', $assignmentId)
-                                ->firstOrFail();
-
-        // Students and instructors can view
-        return view('assignments.show', compact('course', 'assignment'));
-    }
-
-    public function edit($courseNo, $assignmentId)
-    {
-        $this->authorizeInstructor();
-
-        $course = Course::where('course_no', $courseNo)->firstOrFail();
-        $assignment = Assignment::where('course_id', $course->id)
-                                ->where('id', $assignmentId)
-                                ->firstOrFail();
-
-        return view('assignments.edit', compact('course', 'assignment'));
-    }
-
-    public function update(Request $request, $courseNo, $assignmentId)
-    {
-        $this->authorizeInstructor();
-
-        $course = Course::where('course_no', $courseNo)->firstOrFail();
-        $assignment = Assignment::where('course_id', $course->id)
-                                ->where('id', $assignmentId)
-                                ->firstOrFail();
-
-        // Example: toggling "status" (published/unpublished)
-        $assignment->update([
-            'status' => $request->has('status'),
-        ]);
-
-        return redirect()
-            ->route('courses.assignments.index', $courseNo)
-            ->with('success', 'Assignment updated successfully.');
-    }
-
-    public function destroy($courseNo, $assignmentId)
-    {
-        $this->authorizeInstructor();
-
-        $course = Course::where('course_no', $courseNo)->firstOrFail();
-        $assignment = Assignment::where('course_id', $course->id)
-                                ->where('id', $assignmentId)
-                                ->firstOrFail();
-
-        $assignment->delete();
-
-        return redirect()
-            ->route('courses.assignments.index', $courseNo)
-            ->with('success', 'Assignment deleted successfully.');
+        $course = Course::where('id', $course_id)->firstOrFail();
+        return view('assignments.create', compact('course_id'));
     }
 
     /**

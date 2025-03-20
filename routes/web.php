@@ -17,13 +17,13 @@ Route::get('/', function () {
 
 // Group routes for authenticated users
 
-Route::group(['prefix'=>'mulyankan','middleware'=>'auth'],function(){
+Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
 
     // Role-specific dashboard redirection
 
-    Route::get('/student/dashboard',[StudentDashboardController::class,'index'])->middleware('role:Student')->name('student.dashboard');
-    Route::get('/instructor/dashboard',[InstructorDashboardController::class,'index'])->middleware('role:Instructor')->name('instructor.dashboard');
-    Route::get('/ta/dashboard',[TADashboardController::class,'index'])->middleware('role:TA')->name('ta.dashboard');
+    Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])->middleware('role:Student')->name('student.dashboard');
+    Route::get('/instructor/dashboard', [InstructorDashboardController::class, 'index'])->middleware('role:Instructor')->name('instructor.dashboard');
+    Route::get('/ta/dashboard', [TADashboardController::class, 'index'])->middleware('role:TA')->name('ta.dashboard');
 
     // Course routes 
 
@@ -40,7 +40,14 @@ Route::group(['prefix'=>'mulyankan','middleware'=>'auth'],function(){
     Route::post('/courses/{id}/editUser', [MulyankanCoursesController::class, 'editUser'])->middleware('role:Student|Instructor')->name('courses.editUser');
     Route::delete('/courses/deleteUser/{id}', [MulyankanCoursesController::class, 'deleteUser'])->name('courses.deleteUser');
 
-    Route::get('/courses/{id}/assignments',[AssignmentController::class,'index'])->middleware('role:Student|Instructor')->name('assignments.index');
+    Route::get('/courses/{id}/assignments', [AssignmentController::class, 'index'])->middleware('role:Instructor')->name('assignments.index');
+    Route::get('/assignments/{id}/create', [AssignmentController::class, 'create'])->middleware('role:Instructor')->name('assignments.create');
+    Route::get('/assignments/examQuiz', function () {return view('assignments.examQuiz');})->middleware('role:Instructor')->name('assignments.examQuiz');
+    Route::get('/assignments/homework', function () {return view('assignments.homework');})->middleware('role:Instructor')->name('assignments.homework');
+    Route::get('/assignments/bubble', function () {return view('assignments.bubble');})->middleware('role:Instructor')->name('assignments.bubble');
+    Route::get('/assignments/programming', function () {return view('assignments.programming');})->middleware('role:Instructor')->name('assignments.programming');
+    Route::get('/assignments/online', function () {return view('assignments.online');})->middleware('role:Instructor')->name('assignments.online');
+
 
     // Route::prefix('/courses/{courseNo}/assignments')->group(function () {
     //     Route::get('/', [AssignmentController::class, 'index'])->name('courses.assignments.index');
@@ -57,7 +64,7 @@ Route::group(['prefix'=>'mulyankan','middleware'=>'auth'],function(){
     // Route::patch('profile/change/password', [ProfileController::class, 'update'])->middleware('role:Instructor')->name('profile.update');
     // Route::delete('/profile', action: [ProfileController::class, 'destroy'])->middleware('role:Instructor')->name('profile.destroy');
     // Route::post('reset-password', [NewPasswordController::class, 'store'])->middleware('role:Instructor')->name('password.store');
-   
+
     // Dashboard route for all authenticated users (handled by controller based on roles)
     // Route::get('/dashboard', function () {
     //     return (new AuthenticatedSessionController())->redirectBasedOnRole(auth()->user()); // Pass authenticated user here
@@ -70,4 +77,4 @@ Route::group(['prefix'=>'mulyankan','middleware'=>'auth'],function(){
 
 
 // Require authentication routes (login, register, etc.)
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
