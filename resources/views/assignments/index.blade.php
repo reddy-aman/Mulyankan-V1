@@ -2,7 +2,7 @@
     <div class="flex h-screen">
         <!-- Sidebar -->
         <aside class="w-64 bg-white shadow-md px-4 py-6">
-            <h2 class="text-xl font-bold mb-6 text-gray-700">Mulyankan</h2>
+            <!-- <h2 class="text-xl font-bold mb-6 text-gray-700">Mulyankan</h2> -->
             <nav>
             </nav>
         </aside>
@@ -70,7 +70,7 @@
                     class="px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded shadow-md hover:bg-gray-100">
                     Duplicate Assignment
                 </a>
-                <a href="#"
+                <a href="{{ route('assignments.create', parameters: $lastOpenedCourse) }}"
                     class="px-4 py-2 bg-blue-600 text-white border border-blue-600 rounded shadow-md hover:bg-blue-700">
                     + Create Assignment
                 </a>
