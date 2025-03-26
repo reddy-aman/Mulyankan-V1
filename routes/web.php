@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Instructor\MulyankanCoursesController;
+use App\Http\Controllers\Instructor\RosterController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Instructor\AssignmentController;
 
@@ -33,12 +34,17 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
     Route::get('{course}/edit', [MulyankanCoursesController::class, 'edit'])->middleware('role:Student|Instructor')->name('edit');
     Route::put('{course}', [MulyankanCoursesController::class, 'update'])->middleware('role:Student|Instructor')->name('update');
     Route::get('/courses/{id}', [MulyankanCoursesController::class, 'show'])->middleware('role:Student|Instructor')->name('courses.show');
-    Route::get('/courses/{id}/roster', [MulyankanCoursesController::class, 'showRoster'])->middleware('role:Student|Instructor')->name('courses.roster');
-    Route::post('/courses/add-user', [MulyankanCoursesController::class, 'addUser'])->middleware('role:Student|Instructor')->name('courses.addUser');
-    Route::post('/courses/upload-csv', [MulyankanCoursesController::class, 'uploadCSV'])->middleware('role:Student|Instructor')->name('courses.uploadCSV');
-    Route::get('/courses/rosterDownload/{id}', [MulyankanCoursesController::class, 'rosterDownload'])->middleware('role:Student|Instructor')->name('courses.rosterDownload');
-    Route::post('/courses/{id}/editUser', [MulyankanCoursesController::class, 'editUser'])->middleware('role:Student|Instructor')->name('courses.editUser');
-    Route::delete('/courses/deleteUser/{id}', [MulyankanCoursesController::class, 'deleteUser'])->name('courses.deleteUser');
+
+    // Roster routes
+
+    Route::get('/courses/{id}/roster', [RosterController::class, 'showRoster'])->middleware('role:Student|Instructor')->name('courses.roster');
+    Route::post('/courses/add-user', [RosterController::class, 'addUser'])->middleware('role:Student|Instructor')->name('courses.addUser');
+    Route::post('/courses/upload-csv', [RosterController::class, 'uploadCSV'])->middleware('role:Student|Instructor')->name('courses.uploadCSV');
+    Route::get('/courses/rosterDownload/{id}', [RosterController::class, 'rosterDownload'])->middleware('role:Student|Instructor')->name('courses.rosterDownload');
+    Route::post('/courses/editUser{email}', [RosterController::class, 'editUser'])->middleware('role:Student|Instructor')->name('courses.editUser');
+    Route::delete('/courses/deleteUser/{email}', [RosterController::class, 'deleteUser'])->middleware('role:Student|Instructor')->name('courses.deleteUser');
+
+    // Assignment routes
 
     Route::get('/courses/{id}/assignments', [AssignmentController::class, 'index'])->middleware('role:Instructor')->name('assignments.index');
     Route::get('/assignments/{id}/create', [AssignmentController::class, 'create'])->middleware('role:Instructor')->name('assignments.create');
@@ -47,7 +53,12 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
     Route::get('/assignments/bubble', function () {return view('assignments.bubble');})->middleware('role:Instructor')->name('assignments.bubble');
     Route::get('/assignments/programming', function () {return view('assignments.programming');})->middleware('role:Instructor')->name('assignments.programming');
     Route::get('/assignments/online', function () {return view('assignments.online');})->middleware('role:Instructor')->name('assignments.online');
-
+    Route::get('/assignments/upload-template', [AssignmentController::class, 'showUploadForm'])->name('assignments.showUploadForm');
+    Route::post('/assignments/store-template', [AssignmentController::class, 'storeTemplate'])->name('assignments.storeTemplate');
+    Route::get('/assignments/annotate-template', [AssignmentController::class, 'annotateTemplate'])->name('assignments.annotateTemplate');
+    Route::post('/assignments/save-annotation', [AssignmentController::class, 'saveAnnotation'])->name('assignments.saveAnnotation');
+    Route::post('/assignments/split-submission', [AssignmentController::class, 'splitSubmission'])->name('assignments.splitSubmission');
+    Route::post('/assignments/save-annotation', [AssignmentController::class, 'saveAnnotation'])->name('assignments.saveAnnotation');
 
     // Route::prefix('/courses/{courseNo}/assignments')->group(function () {
     //     Route::get('/', [AssignmentController::class, 'index'])->name('courses.assignments.index');

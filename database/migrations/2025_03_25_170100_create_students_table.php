@@ -11,13 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('instructors', function (Blueprint $table) {
+        Schema::create('students', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');  // Foreign key for user table
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->unsignedBigInteger('user_id')->nullable();  // Foreign key for user table
+            $table->string('course_number');
+            $table->string('sid')->nullable();
             $table->timestamps();
 
             // Foreign Key Constraints
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('course_number')->references('course_number')->on('courses')->onDelete('cascade');
         });
     }
 
@@ -26,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('instructors');
+        Schema::dropIfExists('students');
     }
 };

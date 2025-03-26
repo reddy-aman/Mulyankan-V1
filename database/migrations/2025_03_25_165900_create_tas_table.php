@@ -11,18 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roster', function (Blueprint $table) {
+        Schema::create('tas', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->unsignedBigInteger('user_id')->nullable();  
-            $table->unsignedBigInteger('course_id'); 
-            $table->integer('role');
-            $table->string('sid')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable();  // Foreign key for user table
+            $table->string('course_number');
             $table->timestamps();
 
+            // Foreign Key Constraints
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
+            $table->foreign('course_number')->references('course_number')->on('courses')->onDelete('cascade');
         });
     }
 
@@ -31,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('roster');
+        Schema::dropIfExists('tas');
     }
 };

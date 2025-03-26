@@ -4,18 +4,40 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TA extends Model
+class Ta extends Model
 {
-    protected $fillable = ['user_id'];
+    protected $table = 'tas';
 
-    public function students()
-    {
-        return $this->hasMany(Student::class);
-    }
+    protected $fillable = [
+        'name',
+        'email',
+        'user_id',
+        'course_number',
+    ];
 
+    /**
+     * The TA belongs to a user.
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * The TA belongs to a course.
+     * Again, 'course_number' is used to relate to the courses table.
+     */
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_number', 'course_number');
+    }
+
+    /**
+     * Optionally, if TAs are associated with students:
+     */
+    public function students()
+    {
+        return $this->hasMany(Student::class);
     }
 
     public $timestamps = true;

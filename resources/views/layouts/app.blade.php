@@ -17,6 +17,17 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>
+        window.addUserUrl = @json(route('courses.addUser'));
+        window.uploadCSVUrl = @json(route('courses.uploadCSV'));
+        window.deleteUserUrl = @json(route('courses.deleteUser', ['email' => '__EMAIL__']));
+        window.editUserUrl = @json(route('courses.editUser', ['email' => '__EMAIL__']));
+        @if (session('last_opened_course'))
+            window.rosterShowUrl = @json(route('courses.roster', ['id' => session('last_opened_course')]));
+        @else
+            window.rosterShowUrl = "";
+        @endif
+    </script>
 </head>
 
 <body class="font-sans antialiased">

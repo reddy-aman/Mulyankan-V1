@@ -68,7 +68,7 @@ class AuthenticatedSessionController extends Controller
         } 
         // If user is an Instructor, redirect to the instructor dashboard
         elseif ($user->hasRole('Instructor')) {
-            return redirect()->route('instructor.dashboard'); // Ensure you have a route named 'instructor.dashboard'
+            return redirect()->route('instructor.create-courses'); // Ensure you have a route named 'instructor.dashboard'
         } 
         // If user is a TA, redirect to the TA dashboard
         elseif ($user->hasRole('TA')) {
