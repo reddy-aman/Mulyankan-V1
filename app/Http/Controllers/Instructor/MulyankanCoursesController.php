@@ -93,4 +93,14 @@ class MulyankanCoursesController extends Controller
         return view('instructor.show', compact('course'));
     }
 
+    #This is added to link to the course setting page
+    public function settings($id)
+    {
+        // Fetch the course and ensure it belongs to the current instructor
+        $course = Course::where('id', $id)
+                        ->where('instructor_id', Auth::id())
+                        ->firstOrFail();
+    
+        return view('instructor.course_setting', compact('course'));
+    }
 }

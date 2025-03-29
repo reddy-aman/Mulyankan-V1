@@ -34,6 +34,7 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
     Route::get('{course}/edit', [MulyankanCoursesController::class, 'edit'])->middleware('role:Student|Instructor')->name('edit');
     Route::put('{course}', [MulyankanCoursesController::class, 'update'])->middleware('role:Student|Instructor')->name('update');
     Route::get('/courses/{id}', [MulyankanCoursesController::class, 'show'])->middleware('role:Student|Instructor')->name('courses.show');
+    Route::get('/courses/{id}/settings', [MulyankanCoursesController::class, 'settings'])->middleware('role:Instructor')->name('courses.settings');
 
     // Roster routes
 

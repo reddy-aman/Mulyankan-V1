@@ -40,10 +40,6 @@
             {{ $slot }}
         </main>
     </div>
-
-    <div class="p-4 sm:ml-64 ">
-        <h1 class="text-center text-gray-600 text-1xl font-semibold"> ©2024 Website Designed, Developed and Hosted by CSE | IIT-B </h1>
-    </div>
 </body>
 
 </html>

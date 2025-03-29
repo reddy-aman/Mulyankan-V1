@@ -14,6 +14,23 @@
                 <h1 class="text-2xl font-bold text-gray-800">Assignments</h1>
             </div>
 
+            {{-- <div class="flex flex-col md:flex-row justify-between items-start md:items-center mt-6">
+                <div style="padding-left: 1%;">
+                    <p class="text-gray-700 mt-1 text-lg flex items-end space-x-2">
+                        <strong class="text-2xl text-black font-extrabold">{{ $course->course_number }}</strong>
+                        <strong class="text-xl">{{ $course->course_name }}</strong>
+                    </p>
+                    <span class="text-gray-1000">{{ $course->term }} {{ $course->year }}</span>
+                    <p class="mt-4">
+                        <span class="font-semibold text-gray-800">Description</span>
+                        <br>
+                        <span class="text-gray-800">{{ $course->course_description }}</span>
+                    </p>
+                </div>
+                <div class="md:text-right ">
+                </div>
+            </div> --}}
+
             <!-- Content Area -->
             <div class="flex-1 overflow-auto">
                 <!-- No Assignments Message -->
