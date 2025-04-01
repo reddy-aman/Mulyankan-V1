@@ -49,7 +49,7 @@
 
                 <!-- Table -->
                 <div class="mt-6 bg-white shadow-md rounded-lg overflow-hidden">
-                    <table class="min-w-full border border-gray-200 bg-white">
+                    <table class="table-auto w-full border-collapse border border-gray-200">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
                                 <th class="px-4 py-2 border-b text-left">Name</th>

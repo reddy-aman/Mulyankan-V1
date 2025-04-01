@@ -25,7 +25,7 @@
             x-on:user-updated.window="editUserData = $event.detail; showEditModal = false">
 
             <!-- Main Content Wrapper -->
-            <div id="mainContent" class="w-full pt-10 flex-grow">
+            <div id="mainContent" class="w-full flex-grow relative">
                 <div class="bg-white shadow-md px-6 py-4 rounded-lg flex justify-between items-center mb-6">
                     <h1 class="text-2xl font-bold text-gray-800">Course Roster</h1>
                 </div>
@@ -82,7 +82,7 @@
 
 
                 <!-- Table -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden px-4">
+                <div class="mt-6 bg-white shadow-md rounded-lg overflow-hidden">
                     <table class="table-auto w-full border-collapse border border-gray-200">
                         <thead>
                             <tr class="bg-gray-100 text-gray-700">
@@ -197,7 +197,7 @@
 
                 <!-- Bottom Bar / Footer Actions -->
                 <div
-                    class="w-full bg-white shadow-lg py-6 px-4 flex flex-col md:flex-row md:items-center md:justify-between rounded-lg mt-6">
+                    class="w-full bg-white shadow-lg py-4 px-6 flex flex-col md:flex-row md:items-center md:justify-between rounded-lg bottom-0 absolute left-0">
                     <!-- Counters -->
                     <span class="text-gray-600">
                         <span id="studentCount" data-count="{{ is_countable($students) ? count($students) : 0 }}">
