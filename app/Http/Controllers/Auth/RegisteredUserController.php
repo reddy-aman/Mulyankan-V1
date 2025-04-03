@@ -67,7 +67,7 @@ class RegisteredUserController extends Controller
         if ($user->hasRole('Student')) {
             return redirect()->route('student.dashboard'); // Ensure this route exists
         } elseif ($user->hasRole('Instructor')) {
-            return redirect()->route('instructor.dashboard'); // Ensure this route exists
+            return redirect()->route('instructor.create-courses'); // Ensure this route exists
         } elseif ($user->hasRole('TA')) {
             return redirect()->route('ta.dashboard'); // Ensure this route exists
         }

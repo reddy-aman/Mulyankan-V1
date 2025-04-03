@@ -23,7 +23,7 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
     // Role-specific dashboard redirection
 
     Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])->middleware('role:Student')->name('student.dashboard');
-    Route::get('/instructor/dashboard', [InstructorDashboardController::class, 'index'])->middleware('role:Instructor')->name('instructor.dashboard');
+    // Route::get('/instructor/dashboard', [InstructorDashboardController::class, 'index'])->middleware('role:Instructor')->name('instructor.dashboard');
     Route::get('/ta/dashboard', [TADashboardController::class, 'index'])->middleware('role:TA')->name('ta.dashboard');
 
     // Course routes 
@@ -54,11 +54,8 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
     Route::get('/assignments/bubble', function () {return view('assignments.bubble');})->middleware('role:Instructor')->name('assignments.bubble');
     Route::get('/assignments/programming', function () {return view('assignments.programming');})->middleware('role:Instructor')->name('assignments.programming');
     Route::get('/assignments/online', function () {return view('assignments.online');})->middleware('role:Instructor')->name('assignments.online');
-    Route::get('/assignments/upload-template', [AssignmentController::class, 'showUploadForm'])->name('assignments.showUploadForm');
     Route::post('/assignments/store-template', [AssignmentController::class, 'storeTemplate'])->name('assignments.storeTemplate');
     Route::get('/assignments/annotate-template', [AssignmentController::class, 'annotateTemplate'])->name('assignments.annotateTemplate');
-    Route::post('/assignments/save-annotation', [AssignmentController::class, 'saveAnnotation'])->name('assignments.saveAnnotation');
-    Route::post('/assignments/split-submission', [AssignmentController::class, 'splitSubmission'])->name('assignments.splitSubmission');
     Route::post('/assignments/save-annotation', [AssignmentController::class, 'saveAnnotation'])->name('assignments.saveAnnotation');
 
     // Route::prefix('/courses/{courseNo}/assignments')->group(function () {

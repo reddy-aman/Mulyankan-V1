@@ -1,7 +1,7 @@
 <x-app-layout>
     <!-- Include PDF.js from CDN (if needed for further enhancements) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
-    <!-- Include jQuery and jQuery UI if you plan to use a draggable/resizable selection box -->
+    <!-- Include jQuery and jQuery UI if needed -->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
@@ -42,7 +42,7 @@
                     Assignment Type:
                 </label>
                 <div class="text-lg font-semibold text-gray-900">
-                    Online Assignment
+                    Exam/Quiz
                 </div>
             </div>
 
@@ -50,7 +50,7 @@
             <form action="{{ route('assignments.storeTemplate') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
-                <!-- Name Your Assignment -->
+                <!-- Assignment Name -->
                 <div class="mb-6">
                     <label for="assignment_name" class="block text-gray-700 font-medium mb-2">
                         Assignment Name <span class="text-red-500">*</span>
@@ -61,6 +61,46 @@
                         name="assignment_name" 
                         placeholder="Name your assignment" 
                         required
+                        class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+                    />
+                </div>
+
+                <!-- Points -->
+                <div class="mb-6">
+                    <label for="points" class="block text-gray-700 font-medium mb-2">
+                        Points
+                    </label>
+                    <input 
+                        type="number" 
+                        id="points" 
+                        name="points" 
+                        placeholder="Enter total points" 
+                        class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+                    />
+                </div>
+
+                <!-- Release Date -->
+                <div class="mb-6">
+                    <label for="release_date" class="block text-gray-700 font-medium mb-2">
+                        Release Date
+                    </label>
+                    <input 
+                        type="date" 
+                        id="release_date" 
+                        name="release_date" 
+                        class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+                    />
+                </div>
+
+                <!-- Due Date -->
+                <div class="mb-6">
+                    <label for="due_date" class="block text-gray-700 font-medium mb-2">
+                        Due Date
+                    </label>
+                    <input 
+                        type="date" 
+                        id="due_date" 
+                        name="due_date" 
                         class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
                     />
                 </div>
@@ -79,14 +119,9 @@
                             Select PDF
                         </button>
                         <input type="file" name="template_pdf" id="template_pdf" accept="application/pdf" required class="hidden">
-                        <p class="text-xs text-gray-500 mt-1">
-                            Please select a PDF template. This field is required.
-                        </p>
+                        <p id="selected-file-name" class="font-bold text-lg text-gray-500 mt-1"></p>
                     </div>
                 </div>
-
-                <!-- Additional fields (if needed) can be added here -->
-                <!-- Example: Region selection, which could be implemented with JavaScript -->
 
                 <!-- Create Assignment Button -->
                 <div class="text-right">
@@ -100,4 +135,13 @@
             </form>
         </div>
     </div>
+    
+    <!-- Script to update the displayed file name -->
+    <script>
+        document.getElementById('template_pdf').addEventListener('change', function(){
+            if (this.files && this.files.length > 0) {
+                document.getElementById('selected-file-name').textContent = this.files[0].name;
+            }
+        });
+    </script>
 </x-app-layout>

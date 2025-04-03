@@ -10,20 +10,21 @@ return new class extends Migration
     {
         Schema::create('assignments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('course_id');
-            $table->string('title');
+            $table->string('Name');
+            $table->string('course_number');
             $table->integer('points')->nullable();
             $table->dateTime('release_date')->nullable();
             $table->dateTime('due_date')->nullable();
-            $table->boolean('status')->default(true);    // e.g., published/active status
+            $table->boolean('status')->default(false);    // e.g., published/active status
             $table->integer('submissions_count')->default(0);
+            $table->unsignedBigInteger('template_id');
+            $table->string('type');
             $table->timestamps();
 
             // Assuming your courses table is named "courses" with primary key "id"
-            $table->foreign('course_id')
-                  ->references('id')
-                  ->on('courses')
-                  ->onDelete('cascade');
+            $table->foreign('course_number')->references('course_number')->on('courses')->onDelete('cascade');
+            $table->foreign('template_id')->references('id')->on('templates')->onDelete('cascade');
+
         });
     }
 

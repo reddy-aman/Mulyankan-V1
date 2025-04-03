@@ -185,6 +185,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.querySelector('input[name="search"]');
     const tableRows = document.querySelectorAll('#userTableBody .roster-item');
 
+    if (searchInput) {
     searchInput.addEventListener('keyup', function () {
         const term = this.value.toLowerCase();
         tableRows.forEach(function (row) {
@@ -192,4 +193,5 @@ document.addEventListener("DOMContentLoaded", function () {
             row.style.display = rowText.includes(term) ? '' : 'none';
         });
     });
+    }
 });
