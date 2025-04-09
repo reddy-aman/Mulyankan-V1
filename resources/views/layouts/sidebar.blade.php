@@ -101,7 +101,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('courses.settings', $lastOpenedCourse) }}"
+                            <a href="#"
                                 class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                                 <i class="fa fa-cog fa-lg" aria-hidden="true"></i>
                                 <span class="ms-3">Course Settings</span>

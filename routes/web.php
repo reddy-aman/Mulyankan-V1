@@ -57,7 +57,11 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
     Route::post('/assignments/store-template', [AssignmentController::class, 'storeTemplate'])->name('assignments.storeTemplate');
     Route::get('/assignments/annotate-template', [AssignmentController::class, 'annotateTemplate'])->name('assignments.annotateTemplate');
     Route::post('/assignments/save-annotation', [AssignmentController::class, 'saveAnnotation'])->name('assignments.saveAnnotation');
+    Route::get('mulyankan/assignments/{assignment}/submit', [AssignmentController::class, 'uploadForm'])
+    ->name('assignments.uploadForm');
 
+    Route::post('mulyankan/assignments/{assignment}/submit', [AssignmentController::class, 'upload'])
+    ->name('assignments.upload');
     // Route::prefix('/courses/{courseNo}/assignments')->group(function () {
     //     Route::get('/', [AssignmentController::class, 'index'])->name('courses.assignments.index');
     //     Route::get('/create', [AssignmentController::class, 'create'])->name('courses.assignments.create');

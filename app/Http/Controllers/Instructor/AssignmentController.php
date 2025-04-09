@@ -9,6 +9,7 @@ use App\Models\Course;
 use App\Models\Assignment_Annotation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Models\Submission;
 
 class AssignmentController extends Controller
 {
@@ -17,7 +18,6 @@ class AssignmentController extends Controller
         $course = Course::where('id', $courseNo)->firstOrFail();
         $assignments = Assignment::where('course_number', $course->course_number)->get();
 
-        Log::info('Assignments Data:', $assignments->toArray());
         return view('assignments.index', compact( 'assignments'));
     }
 
@@ -52,7 +52,7 @@ class AssignmentController extends Controller
             'points'            => $request->input('points'),
             'release_date'      => $request->input('release_date'),
             'due_date'          => $request->input('due_date'),
-            'status'            => false,
+            'status'            => 'Assignment Created',
             'submissions_count' => 0,
             'template_id'       => $template->id,
             'type'              => 'quiz', 
@@ -94,6 +94,32 @@ class AssignmentController extends Controller
             'redirect_url' => route('assignments.index', $course_id)
         ]);
         
+    }
+
+    public function uploadForm($assignmentId)
+    {
+        return view('assignments.upload-submission', compact('assignmentId'));
+    }
+    
+    public function upload(Request $request, $assignmentId)
+    {
+        $request->validate([
+            'submission_file' => 'required|file|max:10000', // max 10MB
+        ]);
+    
+        $path = $request->file('submission_file')->store('submissions');
+    
+        Submission::create([
+            'assignment_id' => $assignmentId,
+            'file_path' => $path,
+        ]);
+
+        $assignment = Assignment::findOrFail($assignmentId);
+        $assignment->status = 'Submission Uploaded';
+        $assignment->save();
+    
+        $course_id = session('last_opened_course');
+        return redirect()->route('assignments.index',$course_id)->with('success', 'Submission uploaded successfully.');
     }
 
 }

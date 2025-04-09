@@ -15,7 +15,7 @@ return new class extends Migration
             $table->integer('points')->nullable();
             $table->dateTime('release_date')->nullable();
             $table->dateTime('due_date')->nullable();
-            $table->boolean('status')->default(false);    // e.g., published/active status
+            $table->string('status');   // e.g., published/active status
             $table->integer('submissions_count')->default(0);
             $table->unsignedBigInteger('template_id');
             $table->string('type');
