@@ -70,43 +70,62 @@ class RosterController extends Controller
 
     public function addUser(Request $request)
     {
+        // Get the current course from session
+        $course_id = session('last_opened_course');
+        if (!$course_id) {
+            return redirect()->back()->with('error', 'No course selected.');
+        }
+        $course = Course::findOrFail($course_id);
+    
+        // Validate the request.
+        // Note: We check for duplicate email only within the same course.
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => [
                 'required',
                 'email',
-                function ($attribute, $value, $fail) {
-                    if (
-                        Student::where('email', $value)->exists() ||
-                        Instructor::where('email', $value)->exists() ||
-                        Ta::where('email', $value)->exists()
-                    ) {
-                        $fail('The email is already registered under a different role.');
+                function ($attribute, $value, $fail) use ($course, $request) {
+                    // Depending on the requested role, check in the appropriate table
+                    if ($request->role === "1") { // Student
+                        if (Student::where('email', $value)
+                                ->where('course_number', $course->course_number)
+                                ->exists()) {
+                            $fail('The email is already registered for this course.');
+                        }
+                    } elseif ($request->role === "2") { // Instructor
+                        if (Instructor::where('email', $value)
+                                ->where('course_number', $course->course_number)
+                                ->exists()) {
+                            $fail('The email is already registered for this course.');
+                        }
+                    } elseif ($request->role === "3") { // TA
+                        if (Ta::where('email', $value)
+                                ->where('course_number', $course->course_number)
+                                ->exists()) {
+                            $fail('The email is already registered for this course.');
+                        }
                     }
                 }
             ],
             'role' => 'required|in:1,2,3',
-            'sid' => 'nullable|string|max:255',
+            'sid'  => 'nullable|string|max:255',
         ]);
-
-
-        $course_id = session('last_opened_course');
+    
         $role = $request->role;
-
-        if (!$course_id) {
-            return redirect()->back()->with('error', 'No course selected.');
-        }
-
+    
+        // Find the user in the users table, if it exists.
         $user = DB::table('users')->where('email', $request->email)->first();
-        $course = Course::where('id', $course_id)->firstOrFail();
-
+    
+        // Data to be inserted. This includes course_number so that the same email
+        // can be registered in different courses.
         $data = [
-            'name' => $request->name,
-            'email' => $request->email,
-            'user_id' => $user ? $user->id : null,
+            'name'          => $request->name,
+            'email'         => $request->email,
+            'user_id'       => $user ? $user->id : null,
             'course_number' => $course->course_number,
         ];
-
+    
+        // Create the appropriate record based on the role.
         if ($role === "2") {
             Instructor::create($data);
         } elseif ($role === "1") {
@@ -115,19 +134,20 @@ class RosterController extends Controller
         } elseif ($role === "3") {
             Ta::create($data);
         }
-
+    
+        // Optionally notify the user if requested.
         if ($request->has('notify_user')) {
             $emailData = [
-                'name' => $request->name,
+                'name'          => $request->name,
                 'course_number' => $course->course_number,
-                'course_name' => $course->course_name,
-                'role' => $role,
-                'registered' => $user ? true : false,
+                'course_name'   => $course->course_name,
+                'role'          => $role,
+                'registered'    => $user ? true : false,
             ];
-
+    
             Mail::to($request->email)->send(new UserRegisteredMail($emailData));
         }
-
+    
         return response()->json([
             'success' => true,
             'message' => 'User with email ' . $request->email . ' successfully added to the course!',
