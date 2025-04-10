@@ -6,6 +6,7 @@ use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Assignment;
 
 // Import the DB facade
 
@@ -85,12 +86,13 @@ class MulyankanCoursesController extends Controller
         return redirect()->route('courses.index')->with('success', 'Course updated successfully!');
     }
 
-    // show courses for an instructor
+    // show courses for an instructor 11_Apr_Fix for Dashboard.
     public function show($id)
     {
         $course = Course::where('id', $id)->firstOrFail();
+        $assignments = Assignment::where('course_number', $course->course_number)->get();
         session(['last_opened_course' => $id]);
-        return view('instructor.show', compact('course'));
+        return view('instructor.show', compact('course', 'assignments'));
     }
 
     #This is added to link to the course setting page
