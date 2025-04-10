@@ -1,4 +1,4 @@
-<div x-show="showSingleUser" x-cloak class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" @click="showSingleUser = false">
+<div x-show="showSingleUser" style="display: none;" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" @click="showSingleUser = false">
     <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full" @click.stop>
         <h2 class="text-2xl font-semibold mb-2">Add a User</h2>
         <!-- Info Banner -->

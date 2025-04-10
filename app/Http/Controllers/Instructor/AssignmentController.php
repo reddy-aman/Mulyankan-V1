@@ -8,8 +8,8 @@ use App\Models\Template;
 use App\Models\Course;
 use App\Models\Assignment_Annotation;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use App\Models\Submission;
+use Illuminate\Support\Facades\Log;
 
 class AssignmentController extends Controller
 {
@@ -17,6 +17,7 @@ class AssignmentController extends Controller
     {
         $course = Course::where('id', $courseNo)->firstOrFail();
         $assignments = Assignment::where('course_number', $course->course_number)->get();
+        session(['last_opened_course' => $courseNo]);
 
         return view('assignments.index', compact( 'assignments'));
     }
@@ -101,10 +102,97 @@ class AssignmentController extends Controller
         return view('assignments.upload-submission', compact('assignmentId'));
     }
     
+    // public function upload(Request $request, $assignmentId)
+    // {
+    //     $request->validate([
+    //         'submission_file' => 'required|file|max:10000',
+    //     ]);
+    
+    //     $path = $request->file('submission_file')->store('submissions');
+    //     $fullPath = storage_path('app/' . $path);
+    
+    //     Log::info('Uploaded file stored at:', ['path' => $fullPath]);
+    
+    //     $imagePath = $fullPath;
+    
+    //     // Step 1: Convert PDF to image (only first page)
+    //     if (str_ends_with(strtolower($path), '.pdf')) {
+    //         $imagePath = str_replace('.pdf', '.jpg', $fullPath);
+    //         $convertCmd = "convert -density 300 \"$fullPath[0]\" -quality 100 \"$imagePath\"";
+    //         exec($convertCmd . ' 2>&1', $convertOutput);
+    
+    //         Log::info('PDF to image conversion command executed.', [
+    //             'command' => $convertCmd,
+    //             'output' => $convertOutput,
+    //         ]);
+    
+    //         if (!file_exists($imagePath)) {
+    //             Log::error('PDF to image conversion failed.', ['imagePath' => $imagePath]);
+    //             return back()->with('error', 'Failed to convert PDF to image.');
+    //         }
+    //     }
+    
+    //     $rollNo = null;
+    //     $dept = null;
+    
+    //     // Step 2: Get annotations
+    //     $annotations = Assignment_Annotation::where('assignment_id', $assignmentId)->get();
+    //     Log::info('Annotation count:', ['count' => $annotations->count()]);
+    
+    //     foreach ($annotations as $annotation) {
+    //         $name = strtolower(str_replace(' ', '_', $annotation->name));
+    //         $geometry = "{$annotation->width}x{$annotation->height}+{$annotation->left}+{$annotation->top}";
+    //         $croppedPath = storage_path("app/crop_{$name}.jpg");
+    
+    //         // Step 3: Crop using ImageMagick
+    //         $cropCmd = "convert \"$imagePath\" -crop $geometry \"$croppedPath\"";
+    //         exec($cropCmd . ' 2>&1', $cropOutput);
+    
+    //         Log::info('Cropping command executed.', [
+    //             'annotation' => $annotation->name,
+    //             'command' => $cropCmd,
+    //             'output' => $cropOutput
+    //         ]);
+    
+    //         if (!file_exists($croppedPath)) {
+    //             Log::error('Cropped image not found.', ['path' => $croppedPath]);
+    //             continue;
+    //         }
+    
+    //         // Step 4: OCR using Tesseract
+    //         $text = shell_exec("tesseract \"$croppedPath\" stdout");
+    //         $text = trim(preg_replace('/\s+/', '', $text));
+    //         Log::info("Tesseract output for [$name]: $text");
+    
+    //         if ($name === 'roll_no') {
+    //             $rollNo = $text;
+    //         } elseif ($name === 'department') {
+    //             $dept = $text;
+    //         }
+    
+    //         if (file_exists($croppedPath)) {
+    //             unlink($croppedPath);
+    //         }
+    //     }
+    
+    //     // Step 5: Save submission
+    //     $submission = Submission::create([
+    //         'assignment_id' => $assignmentId,
+    //         'file_path' => $path,
+    //         'roll_no' => $rollNo,
+    //         'dept' => $dept,
+    //     ]);
+    
+    //     Log::info('Submission saved:', ['id' => $submission->id, 'roll_no' => $rollNo, 'dept' => $dept]);
+    
+    //     $course_id = session('last_opened_course');
+    //     return redirect()->route('assignments.index', $course_id)->with('success', 'Submission uploaded successfully.');
+    // }
+
     public function upload(Request $request, $assignmentId)
     {
         $request->validate([
-            'submission_file' => 'required|file|max:10000', // max 10MB
+            'submission_file' => 'required|file|max:20480', // max 10MB
         ]);
     
         $path = $request->file('submission_file')->store('submissions');
@@ -121,5 +209,4 @@ class AssignmentController extends Controller
         $course_id = session('last_opened_course');
         return redirect()->route('assignments.index',$course_id)->with('success', 'Submission uploaded successfully.');
     }
-
 }

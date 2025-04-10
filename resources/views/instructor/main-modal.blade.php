@@ -1,4 +1,4 @@
-<div x-show="openModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" @click="openModal = false">
+<div x-show="openModal" style="display: none;" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" @click="openModal = false">
     <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full" @click.stop>
         <h2 class="text-xl font-semibold">Add Students or Staff</h2>
         <div class="mt-3 bg-blue-100 p-3 text-sm text-gray-700 rounded flex items-start">

@@ -1,4 +1,4 @@
-<div x-show="showEditModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+<div x-show="showEditModal" style="display: none;" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
                 @click="showEditModal = false">
                 <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full" @click.stop>
                     <h2 class="text-2xl font-semibold">Edit Course Member</h2>

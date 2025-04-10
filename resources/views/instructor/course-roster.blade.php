@@ -82,7 +82,7 @@
 
 
                 <!-- Table -->
-                <div class="mt-6 bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="mt-6 bg-white shadow-md rounded-lg overflow-auto" style="max-height: calc(100vh - 300px);">
                     <table class="table-auto w-full border-collapse border border-gray-200">
                         <thead>
                             <tr class="bg-gray-100 text-gray-700">

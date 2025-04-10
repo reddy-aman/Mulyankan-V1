@@ -149,7 +149,8 @@ class RosterController extends Controller
         $handle = fopen($file->getRealPath(), 'r');
 
         // Get header row: name,email,sid,role
-        $header = fgetcsv($handle);
+        $rawHeader = fgetcsv($handle);
+        $header = array_map(fn($h) => strtolower(trim($h)), $rawHeader);
 
         $successCount = 0;
         $errors = [];

@@ -52,6 +52,8 @@
                        accept="application/pdf"
                        required
                        class="hidden">
+                <span id="file-name" class="mt-2 text-sm text-blue-700 font-large hidden"></span>
+
             </label>
 
             <!-- Buttons -->
@@ -74,3 +76,18 @@
         </form>
     </div>
 </x-app-layout>
+
+<script>
+    const input = document.getElementById('submission_file');
+    const fileNameSpan = document.getElementById('file-name');
+
+    input.addEventListener('change', function () {
+        if (input.files.length > 0) {
+            fileNameSpan.textContent = input.files[0].name;
+            fileNameSpan.classList.remove('hidden');
+        } else {
+            fileNameSpan.textContent = '';
+            fileNameSpan.classList.add('hidden');
+        }
+    });
+</script>
