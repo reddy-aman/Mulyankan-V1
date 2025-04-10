@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('students', function (Blueprint $table) {
+        Schema::create('instructors', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
+            $table->string('email');
             $table->unsignedBigInteger('user_id')->nullable();  // Foreign key for user table
             $table->string('course_number');
-            $table->string('sid')->nullable();
             $table->timestamps();
 
             // Foreign Key Constraints
@@ -31,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('students');
+        Schema::dropIfExists('instructors');
     }
 };

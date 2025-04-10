@@ -28,12 +28,12 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
 
     // Course routes 
 
-    Route::get('/view/courses', [MulyankanCoursesController::class, 'index'])->middleware('role:Student|Instructor')->name('instructor.create-courses');
+    Route::get('/view/courses', [MulyankanCoursesController::class, 'index'])->middleware('role:Instructor')->name('instructor.create-courses');
     Route::post('/courses/{course}/enroll', [MulyankanCoursesController::class, 'enroll'])->middleware('role:Student|Instructor')->name('courses.enroll');
-    Route::post('/add/courses', [MulyankanCoursesController::class, 'store'])->middleware('role:Student|Instructor')->name('courses.store');
-    Route::get('{course}/edit', [MulyankanCoursesController::class, 'edit'])->middleware('role:Student|Instructor')->name('edit');
-    Route::put('{course}', [MulyankanCoursesController::class, 'update'])->middleware('role:Student|Instructor')->name('update');
-    Route::get('/courses/{id}', [MulyankanCoursesController::class, 'show'])->middleware('role:Student|Instructor')->name('courses.show');
+    Route::post('/add/courses', [MulyankanCoursesController::class, 'store'])->middleware('role:Instructor')->name('courses.store');
+    Route::get('{course}/edit', [MulyankanCoursesController::class, 'edit'])->middleware('role:Instructor')->name('edit');
+    Route::put('{course}', [MulyankanCoursesController::class, 'update'])->middleware('role:Instructor')->name('update');
+    Route::get('/courses/{id}', [MulyankanCoursesController::class, 'show'])->middleware('role:Instructor')->name('courses.show');
     Route::get('/courses/{id}/settings', [MulyankanCoursesController::class, 'settings'])->middleware('role:Instructor')->name('courses.settings');
 
     // Roster routes
@@ -57,11 +57,9 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
     Route::post('/assignments/store-template', [AssignmentController::class, 'storeTemplate'])->name('assignments.storeTemplate');
     Route::get('/assignments/annotate-template', [AssignmentController::class, 'annotateTemplate'])->name('assignments.annotateTemplate');
     Route::post('/assignments/save-annotation', [AssignmentController::class, 'saveAnnotation'])->name('assignments.saveAnnotation');
-    Route::get('mulyankan/assignments/{assignment}/submit', [AssignmentController::class, 'uploadForm'])
-    ->name('assignments.uploadForm');
-
-    Route::post('mulyankan/assignments/{assignment}/submit', [AssignmentController::class, 'upload'])
-    ->name('assignments.upload');
+    Route::get('mulyankan/assignments/{assignment}/submit', [AssignmentController::class, 'uploadForm'])->name('assignments.uploadForm');
+    Route::post('mulyankan/assignments/{assignment}/submit', [AssignmentController::class, 'upload'])->name('assignments.upload');
+    
     // Route::prefix('/courses/{courseNo}/assignments')->group(function () {
     //     Route::get('/', [AssignmentController::class, 'index'])->name('courses.assignments.index');
     //     Route::get('/create', [AssignmentController::class, 'create'])->name('courses.assignments.create');

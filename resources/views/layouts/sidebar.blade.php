@@ -108,6 +108,19 @@
                             </a>
                         </li>
                     @endif
+
+                @elseif (auth()->user()->getRoleNames()->contains('Student'))
+                        <div class="px-4 py-2">
+                            <h2 class="text-2xl font-extrabold text-black tracking-wide">
+                                Welcome to <span class="text-3xl">MULYANKAN</span>
+                            </h2>
+                            <p class="text-sm mt-2 text-black leading-relaxed">
+                                A next-gen <span class="font-semibold">grading software</span> built for seamless
+                                <span class="italic">course management</span>, efficient <span class="italic">assignment
+                                    tracking</span>,
+                                and smooth <span class="italic">student evaluations</span>.
+                            </p>
+                        </div>
                 @endif
             </ul>
         </div>

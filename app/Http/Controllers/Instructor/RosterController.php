@@ -13,6 +13,7 @@ use App\Models\Instructor;
 use App\Models\TA;
 use App\Mail\UserRegisteredMail;
 use Validator;
+use Illuminate\Support\Facades\Log;
 
 class RosterController extends Controller
 {
@@ -169,11 +170,11 @@ class RosterController extends Controller
                 'email' => [
                     'required',
                     'email',
-                    function ($attribute, $value, $fail) {
+                    function ($value, $fail) use ($course) {
                         if (
-                            Student::where('email', $value)->exists() ||
-                            Instructor::where('email', $value)->exists() ||
-                            Ta::where('email', $value)->exists()
+                            Student::where('email', $value)->where('course_number', '!=', $course->course_number)->exists() ||
+                            Instructor::where('email', $value)->where('course_number', '!=', $course->course_number)->exists() ||
+                            Ta::where('email', $value)->where('course_number', '!=', $course->course_number)->exists()
                         ) {
                             $fail("The email {$value} is already registered.");
                         }
