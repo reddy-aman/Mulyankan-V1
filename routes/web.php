@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Instructor\InstructorDashboardController;
 use App\Http\Controllers\Student\StudentDashboardController;
+use App\Http\Controllers\Student\CourseStudentController;
 use App\Http\Controllers\TA\TADashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -25,6 +26,11 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
     Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])->middleware('role:Student')->name('student.dashboard');
     // Route::get('/instructor/dashboard', [InstructorDashboardController::class, 'index'])->middleware('role:Instructor')->name('instructor.dashboard');
     Route::get('/ta/dashboard', [TADashboardController::class, 'index'])->middleware('role:TA')->name('ta.dashboard');
+
+
+    // Students route
+    Route::get('/student/{id}', [CourseStudentController::class, 'show'])->middleware(['role:Student'])->name('courses_student.show');//route for showcourse
+    Route::get('/courses_student/{id}/roster', [CourseStudentController::class, 'roster'])->middleware(['role:Student'])->name('courses_student.roster');//route for roster.
 
     // Course routes 
 

@@ -8,18 +8,18 @@
         <!-- Scrollable container for logo and menu items -->
         <div class="flex flex-col flex-grow px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
             {{-- Logo and Mulyankan brand (optional) --}}
-            <a href="{{ route('instructor.create-courses') }}" class="flex items-center px-0 pb-4 mt-6">
-                <div class="flex items-center">
-                    <x-application-logo />
-                    <span class="ml-3 text-2xl font-semibold dark:text-white">
-                        Mulyankan
-                    </span>
-                </div>
-            </a>
             {{-- Main menu items --}}
             <ul class="space-y-2 font-medium ">
                 <!-- Your existing menu logic remains unchanged -->
                 @if (auth()->user()->getRoleNames()->contains('Instructor'))
+                    <a href="{{ route('instructor.create-courses') }}" class="flex items-center px-0 pb-4 mt-6">
+                        <div class="flex items-center">
+                            <x-application-logo />
+                            <span class="ml-3 text-2xl font-semibold dark:text-white">
+                                Mulyankan
+                            </span>
+                        </div>
+                    </a>
                     @php
                         $currentRoute = Route::currentRouteName();
                         $lastOpenedCourse = session()->has('last_opened_course') ? session('last_opened_course') : null;
@@ -108,8 +108,75 @@
                             </a>
                         </li>
                     @endif
+                    {{-- @elseif (auth()->user()->getRoleNames()->contains('Student'))
+                    <div class="px-4 py-2">
+                        <h2 class="text-2xl font-extrabold text-black tracking-wide">
+                            Welcome to <span class="text-3xl">MULYANKAN</span>
+                        </h2>
+                        <p class="text-sm mt-2 text-black leading-relaxed">
+                            A next-gen <span class="font-semibold">grading software</span> built for seamless
+                            <span class="italic">course management</span>, efficient <span class="italic">assignment
+                                tracking</span>,
+                            and smooth <span class="italic">student evaluations</span>.
+                        </p>
+                    </div>
+                @endif --}}
 
+                    {{-- Student sidebar --}}
                 @elseif (auth()->user()->getRoleNames()->contains('Student'))
+                    <a href="{{ route('student.dashboard') }}" class="flex items-center px-0 pb-4 mt-6">
+                        <div class="flex items-center">
+                            <x-application-logo />
+                            <span class="ml-3 text-2xl font-semibold dark:text-white">
+                                Mulyankan
+                            </span>
+                        </div>
+                    </a>
+                    @if (session()->has('last_opened_course'))
+                        @php
+                            $lastOpenedCourse = session('last_opened_course');
+                            $course = \App\Models\Course::find($lastOpenedCourse);
+                        @endphp
+
+                        @if ($course)
+                            <li class="mb-6">
+                                <div style="padding-left: 1%;">
+                                    <p class="text-gray-700 mt-1 text-lg flex items-end space-x-2">
+                                        <strong
+                                            class="text-2xl text-black font-extrabold">{{ $course->course_number }}</strong>
+                                    </p>
+                                    <div style="padding-left: 2%;">
+                                        <p>
+                                            <strong class="text-normal">{{ $course->course_name }}</strong>
+                                        </p>
+                                        <span class="text-gray-1000 text-sm">{{ $course->term }}
+                                            {{ $course->year }}</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <a href="{{ route('courses_student.show', $lastOpenedCourse) }}"
+                                    class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                                    <i class="fa fa-tasks" aria-hidden="true"></i>
+                                    <span class="ms-3">Dashboard</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('courses_student.roster', $lastOpenedCourse) }}"
+                                    class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                                    <i class="fa fa-users" aria-hidden="true"></i>
+                                    <span class="ms-3">Roster</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#"
+                                    class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                                    <i class="fa fa-refresh" aria-hidden="true"></i>
+                                    <span class="ms-3">Regrade Request</span>
+                                </a>
+                            </li>
+                        @endif
+                    @else
                         <div class="px-4 py-2">
                             <h2 class="text-2xl font-extrabold text-black tracking-wide">
                                 Welcome to <span class="text-3xl">MULYANKAN</span>
@@ -121,12 +188,13 @@
                                 and smooth <span class="italic">student evaluations</span>.
                             </p>
                         </div>
+                    @endif
                 @endif
             </ul>
         </div>
 
         <!-- User Info Section moved to the bottom of the sidebar -->
-        <div class="border-t border-gray-200 dark:border-gray-700 p-2 bg-white dark:bg-gray-800 relative">
+        <div class="mt-auto border-t border-gray-200 dark:border-gray-700 p-2 bg-white dark:bg-gray-800 relative">
             <!-- Clickable Section -->
             <button type="button"
                 class="flex items-center justify-between space-x-2 w-full text-left focus:outline-none"
@@ -142,7 +210,7 @@
                             {{ Auth::user()->roles->pluck('name')->implode(',') }}
                         </p>
 
-                        <!-- Name -->IIT-B
+                        <!-- Name -->
                         <span class="font-medium text-gray-700 dark:text-gray-300">
                             {{ Auth::user()->name }}
                         </span>
@@ -184,6 +252,5 @@
                 </ul>
             </div>
         </div>
-
     </div>
 </aside>
