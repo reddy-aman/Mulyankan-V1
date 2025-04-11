@@ -32,34 +32,38 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
     Route::get('/student/{id}', [CourseStudentController::class, 'show'])->middleware(['role:Student'])->name('courses_student.show');//route for showcourse
     Route::get('/courses_student/{id}/roster', [CourseStudentController::class, 'roster'])->middleware(['role:Student'])->name('courses_student.roster');//route for roster.
 
+    // TA routes
+    Route::get('/view/courses', [TADashboardController::class, 'show'])->middleware('role:Instructor|TA')->name('ta.create-courses');
+
+
     // Course routes 
 
-    Route::get('/view/courses', [MulyankanCoursesController::class, 'index'])->middleware('role:Instructor')->name('instructor.create-courses');
-    Route::post('/courses/{course}/enroll', [MulyankanCoursesController::class, 'enroll'])->middleware('role:Student|Instructor')->name('courses.enroll');
-    Route::post('/add/courses', [MulyankanCoursesController::class, 'store'])->middleware('role:Instructor')->name('courses.store');
-    Route::get('{course}/edit', [MulyankanCoursesController::class, 'edit'])->middleware('role:Instructor')->name('edit');
-    Route::put('{course}', [MulyankanCoursesController::class, 'update'])->middleware('role:Instructor')->name('update');
-    Route::get('/courses/{id}', [MulyankanCoursesController::class, 'show'])->middleware('role:Instructor')->name('courses.show');
-    Route::get('/courses/{id}/settings', [MulyankanCoursesController::class, 'settings'])->middleware('role:Instructor')->name('courses.settings');
+    Route::get('/view/courses', [MulyankanCoursesController::class, 'index'])->middleware('role:Instructor|TA')->name('instructor.create-courses');
+    Route::post('/courses/{course}/enroll', [MulyankanCoursesController::class, 'enroll'])->middleware('role:Student|Instructor|TA')->name('courses.enroll');
+    Route::post('/add/courses', [MulyankanCoursesController::class, 'store'])->middleware('role:Instructor|TA')->name('courses.store');
+    Route::get('{course}/edit', [MulyankanCoursesController::class, 'edit'])->middleware('role:Instructor|TA')->name('edit');
+    Route::put('{course}', [MulyankanCoursesController::class, 'update'])->middleware('role:Instructor|TA')->name('update');
+    Route::get('/courses/{id}', [MulyankanCoursesController::class, 'show'])->middleware('role:Instructor|TA')->name('courses.show');
+    Route::get('/courses/{id}/settings', [MulyankanCoursesController::class, 'settings'])->middleware('role:Instructor|TA')->name('courses.settings');
 
     // Roster routes
 
-    Route::get('/courses/{id}/roster', [RosterController::class, 'showRoster'])->middleware('role:Student|Instructor')->name('courses.roster');
-    Route::post('/courses/add-user', [RosterController::class, 'addUser'])->middleware('role:Student|Instructor')->name('courses.addUser');
-    Route::post('/courses/upload-csv', [RosterController::class, 'uploadCSV'])->middleware('role:Student|Instructor')->name('courses.uploadCSV');
-    Route::get('/courses/rosterDownload/{id}', [RosterController::class, 'rosterDownload'])->middleware('role:Student|Instructor')->name('courses.rosterDownload');
-    Route::post('/courses/editUser{email}', [RosterController::class, 'editUser'])->middleware('role:Student|Instructor')->name('courses.editUser');
-    Route::delete('/courses/deleteUser/{email}', [RosterController::class, 'deleteUser'])->middleware('role:Student|Instructor')->name('courses.deleteUser');
+    Route::get('/courses/{id}/roster', [RosterController::class, 'showRoster'])->middleware('role:Student|Instructor|TA')->name('courses.roster');
+    Route::post('/courses/add-user', [RosterController::class, 'addUser'])->middleware('role:Student|Instructor|TA')->name('courses.addUser');
+    Route::post('/courses/upload-csv', [RosterController::class, 'uploadCSV'])->middleware('role:Student|Instructor|TA')->name('courses.uploadCSV');
+    Route::get('/courses/rosterDownload/{id}', [RosterController::class, 'rosterDownload'])->middleware('role:Student|Instructor|TA')->name('courses.rosterDownload');
+    Route::post('/courses/editUser{email}', [RosterController::class, 'editUser'])->middleware('role:Student|Instructor|TA')->name('courses.editUser');
+    Route::delete('/courses/deleteUser/{email}', [RosterController::class, 'deleteUser'])->middleware('role:Student|Instructor|TA')->name('courses.deleteUser');
 
     // Assignment routes
 
-    Route::get('/courses/{id}/assignments', [AssignmentController::class, 'index'])->middleware('role:Instructor')->name('assignments.index');
-    Route::get('/assignments/{id}/create', [AssignmentController::class, 'create'])->middleware('role:Instructor')->name('assignments.create');
-    Route::get('/assignments/examQuiz', function () {return view('assignments.examQuiz');})->middleware('role:Instructor')->name('assignments.examQuiz');
-    Route::get('/assignments/homework', function () {return view('assignments.homework');})->middleware('role:Instructor')->name('assignments.homework');
-    Route::get('/assignments/bubble', function () {return view('assignments.bubble');})->middleware('role:Instructor')->name('assignments.bubble');
-    Route::get('/assignments/programming', function () {return view('assignments.programming');})->middleware('role:Instructor')->name('assignments.programming');
-    Route::get('/assignments/online', function () {return view('assignments.online');})->middleware('role:Instructor')->name('assignments.online');
+    Route::get('/courses/{id}/assignments', [AssignmentController::class, 'index'])->middleware('role:Instructor|TA')->name('assignments.index');
+    Route::get('/assignments/{id}/create', [AssignmentController::class, 'create'])->middleware('role:Instructor|TA')->name('assignments.create');
+    Route::get('/assignments/examQuiz', function () {return view('assignments.examQuiz');})->middleware('role:Instructor|TA')->name('assignments.examQuiz');
+    Route::get('/assignments/homework', function () {return view('assignments.homework');})->middleware('role:Instructor|TA')->name('assignments.homework');
+    Route::get('/assignments/bubble', function () {return view('assignments.bubble');})->middleware('role:Instructor|TA')->name('assignments.bubble');
+    Route::get('/assignments/programming', function () {return view('assignments.programming');})->middleware('role:Instructor|TA')->name('assignments.programming');
+    Route::get('/assignments/online', function () {return view('assignments.online');})->middleware('role:Instructor|TA')->name('assignments.online');
     Route::post('/assignments/store-template', [AssignmentController::class, 'storeTemplate'])->name('assignments.storeTemplate');
     Route::get('/assignments/annotate-template', [AssignmentController::class, 'annotateTemplate'])->name('assignments.annotateTemplate');
     Route::post('/assignments/save-annotation', [AssignmentController::class, 'saveAnnotation'])->name('assignments.saveAnnotation');

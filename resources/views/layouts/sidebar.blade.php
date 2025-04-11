@@ -11,7 +11,7 @@
             {{-- Main menu items --}}
             <ul class="space-y-2 font-medium ">
                 <!-- Your existing menu logic remains unchanged -->
-                @if (auth()->user()->getRoleNames()->contains('Instructor'))
+                @if (auth()->user()->getRoleNames()->contains('Instructor') || auth()->user()->getRoleNames()->contains('TA'))
                     <a href="{{ route('instructor.create-courses') }}" class="flex items-center px-0 pb-4 mt-6">
                         <div class="flex items-center">
                             <x-application-logo />
@@ -101,7 +101,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#"
+                            <a href="{{ route('courses.settings', $lastOpenedCourse) }}"
                                 class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                                 <i class="fa fa-cog fa-lg" aria-hidden="true"></i>
                                 <span class="ms-3">Course Settings</span>
