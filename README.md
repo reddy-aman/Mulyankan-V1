@@ -1,6 +1,6 @@
-# Mulyankan
+# Mulyankan v1
 
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<p align="center"><a href="#" target="_blank"><img src="https://www.iitb.ac.in/themes/custom/iitb_bootstrap/logo.png" width="400" alt=" IITB Logo"></a></p>
 
 ## About Project
 
