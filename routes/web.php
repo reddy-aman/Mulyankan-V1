@@ -48,12 +48,13 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
 
     // Roster routes
 
-    Route::get('/courses/{id}/roster', [RosterController::class, 'showRoster'])->middleware('role:Student|Instructor|TA')->name('courses.roster');
-    Route::post('/courses/add-user', [RosterController::class, 'addUser'])->middleware('role:Student|Instructor|TA')->name('courses.addUser');
-    Route::post('/courses/upload-csv', [RosterController::class, 'uploadCSV'])->middleware('role:Student|Instructor|TA')->name('courses.uploadCSV');
-    Route::get('/courses/rosterDownload/{id}', [RosterController::class, 'rosterDownload'])->middleware('role:Student|Instructor|TA')->name('courses.rosterDownload');
-    Route::post('/courses/editUser{email}', [RosterController::class, 'editUser'])->middleware('role:Student|Instructor|TA')->name('courses.editUser');
-    Route::delete('/courses/deleteUser/{email}', [RosterController::class, 'deleteUser'])->middleware('role:Student|Instructor|TA')->name('courses.deleteUser');
+    Route::get('/courses/{id}/roster', [RosterController::class, 'showRoster'])->middleware('role:Instructor|TA')->name('courses.roster');
+    Route::post('/courses/add-user', [RosterController::class, 'addUser'])->middleware('role:Instructor|TA')->name('courses.addUser');
+    Route::post('/courses/upload-csv', [RosterController::class, 'uploadCSV'])->middleware('role:Instructor|TA')->name('courses.uploadCSV');
+    Route::get('/courses/rosterDownload/{id}', [RosterController::class, 'rosterDownload'])->middleware('role:Instructor|TA')->name('courses.rosterDownload');
+    Route::post('/courses/editUser{email}', [RosterController::class, 'editUser'])->middleware('role:Instructor|TA')->name('courses.editUser');
+    Route::delete('/courses/deleteUser/{email}', [RosterController::class, 'deleteUser'])->middleware('role:Instructor|TA')->name('courses.deleteUser');
+    Route::post('/courses/sendEnrollmentNotification/{id}', [RosterController::class, 'sendEnrollmentNotification'])->middleware('role:Instructor|TA')->name('courses.sendEnrollmentNotification');
 
     // Assignment routes
 
@@ -64,33 +65,14 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
     Route::get('/assignments/bubble', function () {return view('assignments.bubble');})->middleware('role:Instructor|TA')->name('assignments.bubble');
     Route::get('/assignments/programming', function () {return view('assignments.programming');})->middleware('role:Instructor|TA')->name('assignments.programming');
     Route::get('/assignments/online', function () {return view('assignments.online');})->middleware('role:Instructor|TA')->name('assignments.online');
-    Route::post('/assignments/store-template', [AssignmentController::class, 'storeTemplate'])->name('assignments.storeTemplate');
-    Route::get('/assignments/annotate-template', [AssignmentController::class, 'annotateTemplate'])->name('assignments.annotateTemplate');
-    Route::post('/assignments/save-annotation', [AssignmentController::class, 'saveAnnotation'])->name('assignments.saveAnnotation');
-    Route::get('mulyankan/assignments/{assignment}/submit', [AssignmentController::class, 'uploadForm'])->name('assignments.uploadForm');
-    Route::post('mulyankan/assignments/{assignment}/submit', [AssignmentController::class, 'upload'])->name('assignments.upload');
-    
-    // Route::prefix('/courses/{courseNo}/assignments')->group(function () {
-    //     Route::get('/', [AssignmentController::class, 'index'])->name('courses.assignments.index');
-    //     Route::get('/create', [AssignmentController::class, 'create'])->name('courses.assignments.create');
-    //     Route::post('/', [AssignmentController::class, 'store'])->name('courses.assignments.store');
-    //     Route::get('/{assignment}', [AssignmentController::class, 'show'])->name('courses.assignments.show');
-    //     Route::get('/{assignment}/edit', [AssignmentController::class, 'edit'])->name('courses.assignments.edit');
-    //     Route::put('/{assignment}', [AssignmentController::class, 'update'])->name('courses.assignments.update');
-    //     Route::delete('/{assignment}', [AssignmentController::class, 'destroy'])->name('courses.assignments.destroy');
-    // });
-    // Profile routes for authenticated users
-    // wait
-    // Route::get('/profile', [ProfileController::class, 'edit'])->middleware('role:Instructor')->name('profile.edit');
-    // Route::patch('profile/change/password', [ProfileController::class, 'update'])->middleware('role:Instructor')->name('profile.update');
-    // Route::delete('/profile', action: [ProfileController::class, 'destroy'])->middleware('role:Instructor')->name('profile.destroy');
-    // Route::post('reset-password', [NewPasswordController::class, 'store'])->middleware('role:Instructor')->name('password.store');
-
-    // Dashboard route for all authenticated users (handled by controller based on roles)
-    // Route::get('/dashboard', function () {
-    //     return (new AuthenticatedSessionController())->redirectBasedOnRole(auth()->user()); // Pass authenticated user here
-    // })->name('dashboard');
-
+    Route::post('/assignments/store-template', [AssignmentController::class, 'storeTemplate'])->middleware('role:Instructor|TA')->name('assignments.storeTemplate');
+    Route::get('/assignments/{assignment}/annotate-template', [AssignmentController::class, 'annotateTemplate'])->middleware('role:Instructor|TA')->name('assignments.annotateTemplate');
+    Route::post('/assignments/save-annotation', [AssignmentController::class, 'saveAnnotation'])->middleware('role:Instructor|TA')->name('assignments.saveAnnotation');
+    Route::get('assignments/{assignment}/submit', [AssignmentController::class, 'uploadForm'])->middleware('role:Instructor|TA')->name('assignments.uploadForm');
+    Route::post('assignments/{assignment}/submit', [AssignmentController::class, 'upload'])->middleware('role:Instructor|TA')->name('assignments.upload');
+    Route::get('/assignments/{assignment}/edit',[AssignmentController::class, 'edit'])->middleware('role:Instructor')->name('assignments.edit');
+    Route::put('/assignments/{assignment}',[AssignmentController::class, 'update'])->middleware('role:Instructor')->name('assignments.update');
+    Route::delete('/assignments/{assignment}',[AssignmentController::class, 'deleteAssignment'])->middleware('role:Instructor')->name('assignments.deleteAssignment');
 
 });
 

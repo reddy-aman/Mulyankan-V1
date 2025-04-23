@@ -11,6 +11,13 @@
             <p class="mt-4 text-lg font-semibold text-red-600 bg-red-100 p-3 rounded-lg border border-red-400">
                 ⚠ CSV Format: <strong>Name, Email, SID, Role</strong> (Role must be <em>Student, Instructor, or TA</em>)
             </p>
+
+            <!-- Email Notification -->
+            <div class="mt-4 flex items-center">
+                <input type="checkbox" name="notify_user" value="1" class="mr-2">
+                <span class="text-sm text-gray-700">Let this users know that they were added to the course</span>
+            </div>
+
             <div class="mt-6 flex justify-end space-x-2">
                 <button type="button" class="px-4 py-2 bg-gray-200 border rounded hover:bg-gray-300" @click="showCSVUpload = false">
                     Cancel

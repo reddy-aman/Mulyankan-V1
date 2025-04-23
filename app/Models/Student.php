@@ -12,8 +12,9 @@ class Student extends Model
         'name',
         'email',
         'user_id',
-        'course_number',
+        'course_id',
         'sid',
+        'email_notified',
     ];
 
     /**

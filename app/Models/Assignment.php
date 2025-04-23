@@ -18,7 +18,6 @@ class Assignment extends Model
         'status',            // e.g., published or not
         'submissions_count', // optional
         'template_id',
-        'assignment_annotation_id',
         'type',
     ];
 

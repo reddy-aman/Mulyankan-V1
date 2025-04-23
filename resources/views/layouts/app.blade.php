@@ -24,8 +24,10 @@
         window.editUserUrl = @json(route('courses.editUser', ['email' => '__EMAIL__']));
         @if (session('last_opened_course'))
             window.rosterShowUrl = @json(route('courses.roster', ['id' => session('last_opened_course')]));
+            window.sendNotificationUrl = @json(route('courses.sendEnrollmentNotification', ['id' => session('last_opened_course')]));
         @else
             window.rosterShowUrl = "";
+            window.sendNotificationUrl="";
         @endif
     </script>
 </head>

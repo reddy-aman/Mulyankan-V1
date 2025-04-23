@@ -14,7 +14,6 @@ class CreateTemplatesTable extends Migration
         Schema::create('templates', function (Blueprint $table) {
             $table->id();
             $table->string('file_path');
-            $table->boolean('is_temporary')->default(true);
             $table->timestamps(); // Creates 'created_at' and 'updated_at' columns
         });
     }

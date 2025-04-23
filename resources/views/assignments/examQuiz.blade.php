@@ -50,6 +50,7 @@
             <form action="{{ route('assignments.storeTemplate') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
+                <input type="hidden" name="assignment_type" value="Quiz"> 
                 <!-- Assignment Name -->
                 <div class="mb-6">
                     <label for="assignment_name" class="block text-gray-700 font-medium mb-2">
@@ -65,20 +66,6 @@
                     />
                 </div>
 
-                <!-- Points -->
-                <div class="mb-6">
-                    <label for="points" class="block text-gray-700 font-medium mb-2">
-                        Points
-                    </label>
-                    <input 
-                        type="number" 
-                        id="points" 
-                        name="points" 
-                        placeholder="Enter total points" 
-                        class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-                    />
-                </div>
-
                 <!-- Release Date -->
                 <div class="mb-6">
                     <label for="release_date" class="block text-gray-700 font-medium mb-2">
@@ -88,19 +75,6 @@
                         type="date" 
                         id="release_date" 
                         name="release_date" 
-                        class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-                    />
-                </div>
-
-                <!-- Due Date -->
-                <div class="mb-6">
-                    <label for="due_date" class="block text-gray-700 font-medium mb-2">
-                        Due Date
-                    </label>
-                    <input 
-                        type="date" 
-                        id="due_date" 
-                        name="due_date" 
                         class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
                     />
                 </div>

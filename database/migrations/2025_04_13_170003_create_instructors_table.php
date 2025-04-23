@@ -16,12 +16,18 @@ return new class extends Migration
             $table->string('name');
             $table->string('email');
             $table->unsignedBigInteger('user_id')->nullable();  // Foreign key for user table
-            $table->string('course_number');
+            $table->unsignedBigInteger('course_id');
+            $table->boolean('email_notified')->default(false);
             $table->timestamps();
 
             // Foreign Key Constraints
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('course_number')->references('course_number')->on('courses')->onDelete('cascade');
+            $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
+
+            $table->unique(
+                ['course_id', 'email'],
+                'instructor_unique_courseid_email'
+            );
         });
     }
 
@@ -30,6 +36,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('instructors', function (Blueprint $table) {
+            $table->dropUnique('instructor_unique_courseid_email');
+        });
         Schema::dropIfExists('instructors');
     }
 };

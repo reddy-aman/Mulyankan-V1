@@ -12,6 +12,7 @@ use App\Models\Student;
 use App\Models\Instructor;
 use App\Models\TA;
 use App\Mail\UserRegisteredMail;
+use App\Mail\UserUpdatedMail;
 use Validator;
 use Illuminate\Support\Facades\Log;
 
@@ -48,62 +49,61 @@ class RosterController extends Controller
 
         if ($filterRole !== 'all') {
             if ($filterRole === 'instructors') {
-                $instructors_oth = Instructor::where('course_number', $course->course_number)->get();
+                $instructors_oth = Instructor::where('course_id', $course->id)->get();
 
             } elseif ($filterRole === 'students') {
-                $students = Student::where('course_number', $course->course_number)->get();
+                $students = Student::where('course_id', $course->id)->get();
 
             } elseif ($filterRole === 'TA') {
-                $ta = Ta::where('course_number', $course->course_number)->get();
+                $ta = Ta::where('course_id', $course->id)->get();
 
             }
         } else {
-            $instructors_oth = Instructor::where('course_number', $course->course_number)->get();
-            $students = Student::where('course_number', $course->course_number)->get();
-            $ta = Ta::where('course_number', $course->course_number)->get();
+            $instructors_oth = Instructor::where('course_id', $course->id)->get();
+            $students = Student::where('course_id', $course->id)->get();
+            $ta = Ta::where('course_id', $course->id)->get();
         }
 
         $allInstructors = collect($instructors)->merge($instructors_oth)->values();
         return view('instructor.course-roster', compact('course', 'allInstructors', 'students', 'ta', 'pri_instructor_email'));
     }
 
+    private function validateUniqueCourseUser($email, $role, $course)
+    {
+        $courseId = $course->id;
 
+        $existsInStudent = Student::where('course_id', $courseId)
+                                  ->where('email', $email)
+                                  ->exists();
+    
+        $existsInInstructor = Instructor::where('course_id', $courseId)
+                                        ->where('email', $email)
+                                        ->exists();
+    
+        $existsInTA = Ta::where('course_id', $courseId)
+                        ->where('email', $email)
+                        ->exists();
+    
+        return $existsInStudent || $existsInInstructor || $existsInTA;
+    }
+    
     public function addUser(Request $request)
     {
-        // Get the current course from session
         $course_id = session('last_opened_course');
         if (!$course_id) {
             return redirect()->back()->with('error', 'No course selected.');
         }
         $course = Course::findOrFail($course_id);
     
-        // Validate the request.
-        // Note: We check for duplicate email only within the same course.
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => [
                 'required',
                 'email',
                 function ($attribute, $value, $fail) use ($course, $request) {
-                    // Depending on the requested role, check in the appropriate table
-                    if ($request->role === "1") { // Student
-                        if (Student::where('email', $value)
-                                ->where('course_number', $course->course_number)
-                                ->exists()) {
-                            $fail('The email is already registered for this course.');
-                        }
-                    } elseif ($request->role === "2") { // Instructor
-                        if (Instructor::where('email', $value)
-                                ->where('course_number', $course->course_number)
-                                ->exists()) {
-                            $fail('The email is already registered for this course.');
-                        }
-                    } elseif ($request->role === "3") { // TA
-                        if (Ta::where('email', $value)
-                                ->where('course_number', $course->course_number)
-                                ->exists()) {
-                            $fail('The email is already registered for this course.');
-                        }
+                    if ($this->validateUniqueCourseUser($value, $request->role, $course)) {
+                        $fail('The email is already registered for this course.');
                     }
                 }
             ],
@@ -113,26 +113,24 @@ class RosterController extends Controller
     
         $role = $request->role;
     
-        // Find the user in the users table, if it exists.
         $user = DB::table('users')->where('email', $request->email)->first();
     
-        // Data to be inserted. This includes course_number so that the same email
-        // can be registered in different courses.
         $data = [
             'name'          => $request->name,
             'email'         => $request->email,
             'user_id'       => $user ? $user->id : null,
-            'course_number' => $course->course_number,
+            'course_id'  => $course->id,
         ];
     
-        // Create the appropriate record based on the role.
-        if ($role === "2") {
-            Instructor::create($data);
-        } elseif ($role === "1") {
+        if ($role === "1") {
             $data['sid'] = $request->sid;
-            Student::create($data);
+            $model=Student::create($data);
+    
+        } elseif ($role === "2") {
+            $model=Instructor::create($data);
+    
         } elseif ($role === "3") {
-            Ta::create($data);
+            $model=Ta::create($data);
         }
     
         // Optionally notify the user if requested.
@@ -141,11 +139,11 @@ class RosterController extends Controller
                 'name'          => $request->name,
                 'course_number' => $course->course_number,
                 'course_name'   => $course->course_name,
-                'role'          => $role,
                 'registered'    => $user ? true : false,
             ];
     
             Mail::to($request->email)->send(new UserRegisteredMail($emailData));
+            $model->update(['email_notified' => true]);
         }
     
         return response()->json([
@@ -169,12 +167,20 @@ class RosterController extends Controller
         $file = $request->file('csv_file');
         $handle = fopen($file->getRealPath(), 'r');
 
-        // Get header row: name,email,sid,role
-        $rawHeader = fgetcsv($handle);
-        $header = array_map(fn($h) => strtolower(trim($h)), $rawHeader);
+        $header = ['name', 'email', 'sid', 'role'];
+
+        $firstRow = fgetcsv($handle);
+        if ($firstRow === false) {
+            fclose($handle);
+            return redirect()->back()->with('error', 'CSV appears to be empty.');
+        }
+    
+        if (strtolower(trim($firstRow[0])) === 'name') {
+        } else {
+            rewind($handle);
+        }
 
         $successCount = 0;
-        $errors = [];
 
         while (($row = fgetcsv($handle)) !== false) {
             $data = array_combine($header, $row);
@@ -186,26 +192,17 @@ class RosterController extends Controller
             ][strtolower(trim($data['role']))] ?? $data['role'];
 
             $validator = Validator::make($data, [
-                'name' => 'required|string|max:255',
-                'email' => [
-                    'required',
-                    'email',
-                    function ($value, $fail) use ($course) {
-                        if (
-                            Student::where('email', $value)->where('course_number', '!=', $course->course_number)->exists() ||
-                            Instructor::where('email', $value)->where('course_number', '!=', $course->course_number)->exists() ||
-                            Ta::where('email', $value)->where('course_number', '!=', $course->course_number)->exists()
-                        ) {
-                            $fail("The email {$value} is already registered.");
-                        }
-                    }
-                ],
-                'role' => 'required|in:1,2,3',
-                'sid' => 'nullable|string|max:255',
+                'name'  => 'required|string|max:255',
+                'email' => 'required|email',
+                'role'  => 'required|in:1,2,3',
+                'sid'   => 'nullable|string|max:255',
             ]);
 
             if ($validator->fails()) {
-                $errors[] = "Row with email {$data['email']} failed: " . implode(', ', $validator->errors()->all());
+                continue;
+            }
+
+            if ($this->validateUniqueCourseUser($data['email'], $data['role'], $course)) {
                 continue;
             }
 
@@ -215,19 +212,35 @@ class RosterController extends Controller
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'user_id' => $user ? $user->id : null,
-                'course_number' => $course->course_number,
+                'course_id' => $course->id,
             ];
 
-            if ($data['role'] == 1) {
+            if ($data['role'] === 1) {
+                // student
                 $recordData['sid'] = $data['sid'];
-                Student::create($recordData);
-            } elseif ($data['role'] == 2) {
-                Instructor::create($recordData);
-            } elseif ($data['role'] == 3) {
-                Ta::create($recordData);
+                $model=Student::create($recordData);
+    
+            } elseif ($data['role'] === 2) {
+                // instructor
+                $model=Instructor::create($recordData);
+    
+            } else {
+                // ta
+                $model=Ta::create($recordData);
             }
-
             $successCount++;
+
+            if ($request->has('notify_user')) {
+                $emailData = [
+                    'name'          => $recordData['name'],
+                    'course_number' => $course->course_number,
+                    'course_name'   => $course->course_name,
+                    'registered'    => $user ? true : false,
+                ];
+        
+                Mail::to($recordData['email'])->send(new UserRegisteredMail($emailData));
+                $model->update(['email_notified' => true]);
+            }
         }
 
         fclose($handle);
@@ -236,15 +249,13 @@ class RosterController extends Controller
             'success' => true,
             'message' => "CSV upload complete. Successfully added {$successCount} users.",
             'redirect' => route('courses.roster', ['id' => session('last_opened_course')]),
-            'errors' => $errors,
         ]);
-
     }
 
     public function rosterDownload($id)
     {
         $course = Course::findOrFail($id);
-        $students = Student::where('course_number', $course->course_number)
+        $students = Student::where('course_id', $course->id)
             ->select('name', 'email', 'sid')
             ->get();
 
@@ -327,7 +338,8 @@ class RosterController extends Controller
         $data = [
             'name'  => $request->name,
             'email' => $newEmail,
-            'course_number' => $course->course_number,
+            'course_id' => $course->id,
+            'email_notified' => true,
             'updated_at' => now(),
         ];
         // For students, include sid
@@ -350,6 +362,19 @@ class RosterController extends Controller
                 $updatedRecord = Ta::create($data);
             }
         }
+
+        $roleNameMap = [1 => 'Student', 2 => 'Instructor', 3 => 'TA'];
+
+        $emailData = [
+            'name'          => $request->name,
+            'email'         => $newEmail,
+            'course_number' => $course->course_number,
+            'role_name'     => $roleNameMap[$newRole],
+            'sid'           => $request->sid,
+        ];
+        
+        Mail::to($newEmail)->send(new UserUpdatedMail($emailData));
+
         return response()->json([
             'success' => true,
             'message' => 'Member updated successfully.',
@@ -380,4 +405,54 @@ class RosterController extends Controller
 
         return response()->json(['success' => true, 'message' => 'User deleted successfully']);
     }
+
+    public function sendEnrollmentNotification($id)
+    {
+        $course = Course::findOrFail($id);
+    
+        $students = Student::where('course_id', $course->id)
+                           ->where('email_notified', false)
+                           ->get();
+    
+        $instructors = Instructor::where('course_id', $course->id)
+                                 ->where('email_notified', false)
+                                 ->get();
+    
+        $tas = Ta::where('course_id', $course->id)
+                 ->where('email_notified', false)
+                 ->get();
+    
+        $usersToNotify = $students->merge($instructors)->merge($tas);
+
+        if ($usersToNotify->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'No users found to notify.',
+            ]);
+        }
+
+        foreach ($usersToNotify as $user) {
+            // Prepare email data
+            $user_email = DB::table('users')->where('email', $user->email)->first();
+
+            $emailData = [
+                'name' => $user->name,
+                'course_number' => $course->course_number,
+                'course_name' => $course->course_name,
+                'registered'    => $user_email ? true : false,
+            ];
+    
+            // Send the notification email
+            Mail::to($user->email)->send(new UserRegisteredMail($emailData));
+
+            $user->update(['email_notified' => true]);
+
+        }
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'Enrollment notifications sent successfully to users.',
+        ]);
+    }
+    
 }

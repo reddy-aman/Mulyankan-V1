@@ -10,7 +10,7 @@
             @php
                 $lastOpenedCourse = session('last_opened_course');
                 $stages = [
-                    'Assignment Created',
+                    'Edit Outline',
                     'Submission Uploaded',
                     'Submission Graded',
                     'Grade Reviewed',
@@ -37,7 +37,7 @@
                     </div>
                 @endif
 
-                <div class="bg-white shadow-md rounded-lg overflow-hidden mt-4">
+                <div class="bg-white shadow-md rounded-lg overflow-visible mt-4">
                     <table class="min-w-full border border-gray-200 bg-white">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
@@ -51,6 +51,7 @@
                                 <th class="px-4 py-2 border-b text-left"># Graded</th>
                                 <th class="px-4 py-2 border-b text-left">Status</th>
                                 <th class="px-4 py-2 border-b text-left">Regrades</th>
+                                <th class="px-4 py-2 border-b text-left">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -72,38 +73,72 @@
                                     <td class="px-4 py-2 border-b">{{ $assignment->submissions_count ?? 0 }}</td>
                                     <td class="px-4 py-2 border-b">{{ $assignment->graded_count ?? 0 }}</td>
                                     <td class="px-4 py-2 border-b">
-                                        <div class="flex flex-col space-y-1">
-                                            @foreach ($stages as $index => $stage)
-                                                <div class="flex items-center space-x-1">
-                                                    @if ($index <= $currentStage)
-                                                        <span class="text-green-500">✅   </span>
-                                                        <span class="text-green-500 text-sm font-semibold">{{ $stage }}</span>
-                                                    @elseif ($index === $currentStage+1)
-                                                        <!-- Only the very next stage -->
-                                                        <span class="text-blue-500">➤</span>
-                                                        @if ($stage === 'Submission Uploaded')
-                                                            <a href="{{ route('assignments.uploadForm', $assignment->id) }}"
-                                                            class="text-blue-600 font-semibold">{{ $stage }}</a>
-                                                        @elseif ($stage === 'Submission Graded')
-                                                            <a href="#"
-                                                            class="text-blue-600 font-semibold">{{ $stage }}</a>
-                                                        @elseif ($stage === 'Grade Reviewed')
-                                                            <a href="#"
-                                                            class="text-blue-600 font-semibold">{{ $stage }}</a>
-                                                        @else
-                                                            <span class="text-blue-600 font-semibold">{{ $stage }}</span>
-                                                        @endif
+                                    <div class="flex flex-col space-y-1">
+                                        @foreach($stages as $index => $stage)
+                                            <div class="flex items-center">
+                                            {{-- arrow only on current stage --}}
+                                            @if($index === $currentStage + 1)
+                                                <span class="text-blue-500 mr-2">➤</span>
+                                            @else
+                                                <span class="w-5"></span>
+                                            @endif
 
-                                                    @else
-                                                        <!-- ❌ Future stage -->
-                                                        <span class="text-red-500">❌</span>
-                                                        <span class="text-red-500 text-sm font-semibold">{{ $stage }}</span>
-                                                    @endif
-                                                </div>
-                                            @endforeach
+                                            {{-- pick the right route for each stage --}}
+                                            @php
+                                                switch($stage) {
+                                                case 'Edit Outline':
+                                                    $url = route('assignments.annotateTemplate', ['assignment' => $assignment->id]); break;
+                                                case 'Submission Uploaded':
+                                                    $url = route('assignments.uploadForm', $assignment->id);   break;
+                                                case 'Submission Graded':
+                                                    $url = "";   break;
+                                                case 'Grade Reviewed':
+                                                    $url = "";   break;
+                                                }
+                                            @endphp
+
+                                            <a href="{{ $url }}"
+                                                class="{{ $index === $currentStage + 1
+                                                            ? 'text-blue-600 font-semibold'
+                                                            : 'text-gray-700 hover:text-blue-600' }}">
+                                                {{ $stage }}
+                                            </a>
+                                            </div>
+                                        @endforeach
                                         </div>
                                     </td>
                                     <td class="px-4 py-2 border-b">{{ $assignment->regrades_count ?? 0 }}</td>
+                                    <td class="px-4 py-2 border-b text-right">
+                                        <div class="relative inline-block">
+                                            <!-- Button -->
+                                            <button type="button"
+                                                    class="action-btn text-gray-500 hover:text-gray-700 focus:outline-none">
+                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                    class="h-5 w-5"
+                                                    fill="currentColor"
+                                                    viewBox="0 0 20 20">
+                                                    <path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z"/>
+                                                </svg>
+                                            </button>
+
+                                                <!-- Dropdown -->
+                                            <div class="action-menu hidden absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded shadow-md z-50 max-h-96 overflow-y-auto">      
+                                                <a href="{{ route('assignments.edit', $assignment->id) }}"
+                                                    class="block px-4 py-2 whitespace-nowrap text-gray-700 hover:bg-gray-100">
+                                                    Edit Assignment
+                                                </a>
+                                                <form method="POST" action="{{ route('assignments.deleteAssignment', $assignment->id) }}"
+                                                        onsubmit="return confirm('Are you sure you want to delete this assignment?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                            class="block w-full text-left px-4 py-2 whitespace-nowrap text-gray-600 hover:bg-gray-100">
+                                                    Delete Assignment
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -132,4 +167,33 @@
             </div>
         </div>
     </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Toggle dropdown visibility
+  document.querySelectorAll('.action-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const container = btn.closest('.relative');
+      const menu = container.querySelector('.action-menu');
+
+      // Hide all other menus
+      document.querySelectorAll('.action-menu').forEach(m => {
+        if (m !== menu) m.classList.add('hidden');
+      });
+
+      // Toggle this one
+      menu.classList.toggle('hidden');
+    });
+  });
+
+  // Close menus when clicking outside
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.action-menu').forEach(menu => {
+      menu.classList.add('hidden');
+    });
+  });
+});
+</script>
+
 </x-app-layout>

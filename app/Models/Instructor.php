@@ -12,7 +12,10 @@ class Instructor extends Model
         'name',
         'email',
         'user_id',
-        'course_number',
+        'course_id',
+        'term',
+        'year',
+        'email_notified',
     ];
 
     /**

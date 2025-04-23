@@ -1,3 +1,4 @@
+
 <x-app-layout>
     <div class="flex h-screen">
         <!-- Sidebar -->
@@ -225,10 +226,12 @@
                             </button>
                         </form>
 
-                        <button
-                            class="px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded shadow-md hover:bg-gray-100">
+                        <button type="button"
+                            class="px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded shadow-md hover:bg-gray-100"
+                            id="sendNotificationBtn">
                             Send Enrollment Notification
                         </button>
+
                         <button
                             class="px-4 py-2 bg-blue-600 text-white border border-blue-600 rounded shadow-md hover:bg-blue-700"
                             @click="openModal = true">
@@ -258,3 +261,4 @@
 
 <!-- Success Message Element -->
 <div id="successMessage" class="hidden mt-4 p-2 bg-green-500 text-white rounded"></div>
+

@@ -8,6 +8,5 @@ class Template extends Model
 {
     protected $fillable = [
         'file_path',
-        'is_temporary',
     ];
 }

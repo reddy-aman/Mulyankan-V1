@@ -12,7 +12,8 @@ class Ta extends Model
         'name',
         'email',
         'user_id',
-        'course_number',
+        'course_id',
+        'email_notified',
     ];
 
     /**

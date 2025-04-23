@@ -156,13 +156,7 @@ $(document).ready(function () {
             success: function (response) {
                 if (response.success) {
                     $userRow.remove();
-                    if (roleText === 'Student') {
-                        updateCounter('#studentCount', 'Student', 'Students', -1);
-                    } else if (roleText === 'Instructor') {
-                        updateCounter('#instructorCount', 'Instructor', 'Instructors', -1);
-                    } else if (roleText === 'TA') {
-                        updateCounter('#taCount', 'TA', 'TAs', -1);
-                    }
+                    location.reload();
                 } else {
                     alert("Error: " + response.message);
                 }
@@ -175,6 +169,39 @@ $(document).ready(function () {
                     errorMessage = Object.values(xhr.responseJSON.errors).flat().join(", ");
                 }
                 alert(errorMessage);
+            }
+        });
+    });
+
+    $('#sendNotificationBtn').on('click', function (e) {
+        e.preventDefault();
+
+        if (!confirm("Are you sure you want to send the enrollment notification?")) {
+            return;
+        }
+
+        $.ajax({
+            url: window.sendNotificationUrl,
+            type: "POST", 
+            headers: { 
+                'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content 
+            },
+            success: function (response) {
+                console.log("AJAX Success Response:", response); 
+            
+                if (response.success) {
+                    $("#successMessage").text(response.message)
+                        .removeClass("hidden")
+                        .prependTo("#mainContent")
+                        .fadeIn()
+                        .delay(3000)
+                        .fadeOut();
+                } else {
+                    alert("Something went wrong!");
+                }
+            },
+            error: function () {
+                alert("Error while sending notification.");
             }
         });
     });
@@ -195,3 +222,4 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     }
 });
+
