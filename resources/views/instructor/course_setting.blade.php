@@ -1,10 +1,11 @@
-You said:
+<!-- resources/views/instructor/course_setting.blade.php -->
 <x-app-layout>
     <div class="flex h-screen">
         <!-- Sidebar -->
         <aside class="w-64 bg-white shadow-md px-4 py-6">
             <nav>
-                <!-- Sidebar links go here -->
+                <a href="/mulyankan/courses" class="block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded">Back to
+                    Courses</a>
             </nav>
         </aside>
 
@@ -15,105 +16,146 @@ You said:
                 <h1 class="text-2xl font-bold text-gray-800">Course Settings</h1>
             </div>
 
-            {{-- <div class="flex flex-col md:flex-row justify-between items-start md:items-center mt-6">
-                <div style="padding-left: 1%;">
-                    <p class="text-gray-700 mt-1 text-lg flex items-end space-x-2">
-                        <strong class="text-2xl text-black font-extrabold">{{ $course->course_number }}</strong>
-                        <strong class="text-xl">{{ $course->course_name }}</strong>
-                    </p>
-                    <span class="text-gray-1000">{{ $course->term }} {{ $course->year }}</span>
-                    <p class="mt-4">
-                        <span class="font-semibold text-gray-800">Description</span>
-                        <br>
-                        <span class="text-gray-800">{{ $course->course_description }}</span>
-                    </p>
+            <!-- Success Message -->
+            @if (session('success'))
+                <div class="mt-4 p-4 bg-green-100 text-green-700 rounded-lg">
+                    {{ session('success') }}
                 </div>
-                <div class="md:text-right ">
-                </div>
-            </div> --}}
+            @endif
 
             <!-- Basic Settings -->
-            <div class="mt-6 p-6 bg-white rounded-lg shadow">
-                <h2 class="text-xl font-semibold text-gray-800 mb-2">Basic Settings</h2>
-                <label class="block text-gray-700">Course Number *</label>
-                <input type="text" class="block w-full p-2 border border-gray-300 rounded mb-4" placeholder="TS101">
+            <form id="update-course-form" action="{{ route('courses.updateSettings', $course->id) }}" method="POST"
+                class="mt-6 p-6 bg-white rounded-lg shadow">
+                @csrf
+                @method('PUT')
 
-                <label class="block text-gray-700">Course Name *</label>
-                <input type="text" class="block w-full p-2 border border-gray-300 rounded mb-4"
-                    placeholder="Testing Course">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Basic Settings</h2>
 
-                <label class="block text-gray-700">Course Description</label>
-                <textarea class="block w-full p-2 border border-gray-300 rounded mb-4">This is a testing course created to test the layout</textarea>
-
-                <label class="block text-gray-700">Term</label>
-                <select class="block w-full p-2 border border-gray-300 rounded mb-4">
-                    <option>Spring</option>
-                    <option>Fall</option>
-                    <option>Winter</option>
-                    <option>Summer</option>
-                </select>
-
-                <label class="block text-gray-700">Year</label>
-                <select class="block w-full p-2 border border-gray-300 rounded mb-4">
-                    <option>2025</option>
-                    <option>2024</option>
-                    <option>2023</option>
-                    <option>2022</option>
-                </select>
-
-                <label class="block text-gray-700">Department</label>
-                <select class="block w-full p-2 border border-gray-300 rounded mb-4">
-                    <option>Computer Science</option>
-                    <option>Mathematics</option>
-                    <option>Physics</option>
-                </select>
-
-                <label class="block text-gray-700">Entry Code</label>
-                <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600">
-                <span class="ml-2">Allow students to enroll via course entry code</span>
-            </div>
-
-            <!-- Regrade Requests Settings -->
-            <div class="mt-6 p-6 bg-white rounded-lg shadow">
-                <h2 class="text-xl font-semibold text-gray-800 mb-2">Regrade Requests Settings</h2>
-                <label class="inline-flex items-center mt-2">
-                    <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" checked>
-                    <span class="ml-2">Enable Regrade Requests</span>
-                </label>
-            </div>
-
-            <!-- Grading Defaults -->
-            <div class="mt-6 p-6 bg-white rounded-lg shadow">
-                <h2 class="text-xl font-semibold text-gray-800 mb-2">Grading Defaults</h2>
-                <label class="block text-gray-700">Default Scoring Method</label>
-                <label class="inline-flex items-center">
-                    <input type="radio" class="form-radio text-blue-600" name="scoring" checked>
-                    <span class="ml-2">Negative Scoring</span>
-                </label>
-                <label class="inline-flex items-center ml-6">
-                    <input type="radio" class="form-radio text-blue-600" name="scoring">
-                    <span class="ml-2">Positive Scoring</span>
-                </label>
-                <label class="block text-gray-700 mt-4">Default Score Bounds</label>
-                <label class="inline-flex items-center">
-                    <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" checked>
-                    <span class="ml-2">Ceiling (maximum score as determined by the Assignment Outline)</span>
-                </label>
-                <label class="inline-flex items-center ml-6">
-                    <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" checked>
-                    <span class="ml-2">Floor (minimum score is 0.0)</span>
-                </label>
-            </div>
-
-            <!-- Modify Course -->
-            <div class="mt-6 p-6 bg-white rounded-lg shadow flex justify-between">
-                <button class="bg-red-600 text-white px-4 py-2 rounded">Unpublish All Grades</button>
-                <div>
-                    <button class="bg-gray-400 text-white px-4 py-2 rounded">Duplicate Course</button>
-                    <button class="bg-red-600 text-white px-4 py-2 rounded">Delete Course</button>
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded">Update Course</button>
+                <!-- Course Number -->
+                <div class="mb-4">
+                    <label for="course_number" class="block text-gray-700 font-medium">Course Number *</label>
+                    <input type="text" id="course_number" name="course_number"
+                        value="{{ old('course_number', $course->course_number) }}"
+                        class="block w-full p-2 border border-gray-300 rounded @error('course_number') border-red-500 @enderror"
+                        placeholder="TS101" required>
+                    @error('course_number')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
+
+                <!-- Course Name -->
+                <div class="mb-4">
+                    <label for="course_name" class="block text-gray-700 font-medium">Course Name *</label>
+                    <input type="text" id="course_name" name="course_name"
+                        value="{{ old('course_name', $course->course_name) }}"
+                        class="block w-full p-2 border border-gray-300 rounded @error('course_name') border-red-500 @enderror"
+                        placeholder="Testing Course" required>
+                    @error('course_name')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Course Description -->
+                <div class="mb-4">
+                    <label for="course_description" class="block text-gray-700 font-medium">Course Description</label>
+                    <textarea id="course_description" name="course_description"
+                        class="block w-full p-2 border border-gray-300 rounded @error('course_description') border-red-500 @enderror"
+                        rows="4" placeholder="This is a testing course created to test the layout">{{ old('course_description', $course->course_description) }}</textarea>
+                    @error('course_description')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Term -->
+                <div class="mb-4">
+                    <label for="term" class="block text-gray-700 font-medium">Term</label>
+                    <select id="term" name="term"
+                        class="block w-full p-2 border border-gray-300 rounded @error('term') border-red-500 @enderror"
+                        required>
+                        @foreach (['Spring', 'Fall', 'Winter', 'Summer'] as $term)
+                            <option value="{{ $term }}"
+                                {{ old('term', $course->term) == $term ? 'selected' : '' }}>{{ $term }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('term')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Year -->
+                <div class="mb-4">
+                    <label for="year" class="block text-gray-700 font-medium">Year</label>
+                    <select id="year" name="year"
+                        class="block w-full p-2 border border-gray-300 rounded @error('year') border-red-500 @enderror"
+                        required>
+                        @foreach ([2025, 2024, 2023, 2022] as $year)
+                            <option value="{{ $year }}"
+                                {{ old('year', $course->year) == $year ? 'selected' : '' }}>{{ $year }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('year')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Department -->
+                <div class="mb-4">
+                    <label for="department" class="block text-gray-700 font-medium">Department</label>
+                    <select id="department" name="department"
+                        class="block w-full p-2 border border-gray-300 rounded @error('department') border-red-500 @enderror"
+                        required>
+                        @foreach (['Computer Science', 'Mathematics', 'Physics'] as $dept)
+                            <option value="{{ $dept }}"
+                                {{ old('department', $course->department) == $dept ? 'selected' : '' }}>
+                                {{ $dept }}</option>
+                        @endforeach
+                    </select>
+                    @error('department')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Modify Course -->
+                {{-- <div class="mt-6 flex justify-end space-x-4">
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                        Update Course
+                    </button>
+                </div> --}}
+
+
+            </form>
+            {{-- <form action="{{ route('courses.destroy', $course->id) }}" method="POST"
+                onsubmit="return confirm('Are you sure you want to delete this course?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                    Delete Course
+                </button>
+            </form> --}}
+
+
+            <div class="mt-6 flex justify-end space-x-4">
+                <!-- Update button outside the form, targeting it by ID -->
+                <button type="submit" form="update-course-form"
+                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    Update Course
+                </button>
+
+                <!-- Delete form as a sibling -->
+                <form action="{{ route('courses.destroy', $course->id) }}" method="POST"
+                    onsubmit="return confirm('Are you sure you want to delete this course?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                        Delete Course
+                    </button>
+                </form>
             </div>
+
         </div>
+
+
     </div>
 </x-app-layout>

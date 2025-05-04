@@ -82,6 +82,11 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
     ->middleware('auth')
     ->name('password.update');
 
+
+    Route::get('/courses/{id}/settings', [MulyankanCoursesController::class, 'settings'])->middleware('role:Instructor|TA')->name('courses.settings');
+    Route::put('/courses/{id}/settings', [MulyankanCoursesController::class, 'update'])->middleware('role:Instructor|TA')->name('courses.updateSettings');
+    Route::delete('/courses/{id}/settings', [MulyankanCoursesController::class, 'updateFromDelete'])->middleware('role:Instructor|TA')->name('courses.updateFromDelete');
+    Route::delete('/courses/{id}', [MulyankanCoursesController::class, 'destroy'])->middleware('role:Instructor|TA')->name('courses.destroy');
 });
 
 

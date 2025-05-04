@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Assignment;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Log;
 
 // Import the DB facade
 
@@ -68,23 +70,23 @@ class MulyankanCoursesController extends Controller
         return view('courses.edit', compact('course'));
     }
 
-    public function update(Request $request, Course $course)
-    {
-        $request->validate([
-            'course_name' => 'required|string|max:255',
-            'course_description' => 'required|string',
-        ]);
+    // public function update(Request $request, Course $course)
+    // {
+    //     $request->validate([
+    //         'course_name' => 'required|string|max:255',
+    //         'course_description' => 'required|string',
+    //     ]);
 
-        $course->update([
-            'course_name' => $request->course_name,
-            'course_description' => $request->course_description,
-            'term' => $request->term,
-            'year' => $request->year,
-            'department' => $request->department,
-        ]);
+    //     $course->update([
+    //         'course_name' => $request->course_name,
+    //         'course_description' => $request->course_description,
+    //         'term' => $request->term,
+    //         'year' => $request->year,
+    //         'department' => $request->department,
+    //     ]);
 
-        return redirect()->route('courses.index')->with('success', 'Course updated successfully!');
-    }
+    //     return redirect()->route('courses.index')->with('success', 'Course updated successfully!');
+    // }
 
     // show courses for an instructor 11_Apr_Fix for Dashboard.
     public function show($id)
@@ -98,11 +100,53 @@ class MulyankanCoursesController extends Controller
     #This is added to link to the course setting page
     public function settings($id)
     {
-        // Fetch the course and ensure it belongs to the current instructor
         $course = Course::where('id', $id)
-                        ->where('instructor_id', Auth::id())
-                        ->firstOrFail();
-    
+            ->where('instructor_id', Auth::id())
+            ->firstOrFail();
+
         return view('instructor.course_setting', compact('course'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $course = Course::where('id', $id)
+            ->where('instructor_id', Auth::id())
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'course_number' => 'required|string|max:255|unique:courses,course_number,' . $course->id,
+            'course_name' => 'required|string|max:255',
+            'course_description' => 'nullable|string',
+            'term' => 'required|string|in:Spring,Fall,Winter,Summer',
+            'year' => 'required|integer|min:2000|max:2100',
+            'department' => 'required|string|in:Computer Science,Mathematics,Physics',
+        ]);
+
+        $course->update($validated);
+
+        return Redirect::route('courses.settings', $course->id)
+            ->with('success', 'Course updated successfully.');
+    }
+
+    public function updateFromDelete(Request $request, $id)
+    {
+        // Redirect DELETE requests to the update method
+        return $this->destroy($request, $id);
+    }
+
+    public function destroy($id)
+    {
+        // Log::info('Attempting to delete course', [
+        //     'course_id' => $id,
+        //     'user_id' => Auth::id(),
+        // ]);
+
+        $course = Course::where('id', $id)
+                ->firstOrFail();
+
+        $course->delete();
+
+        return Redirect::route('instructor.create-courses')
+            ->with('success', 'Course deleted successfully.');
     }
 }
