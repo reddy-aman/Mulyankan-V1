@@ -13,8 +13,8 @@ class StudentDashboardController extends Controller
     public function index()
     {
         $userEmail = Auth::user()->email;
-        $courseNumbers = Student::where('email', $userEmail)->pluck('course_number');
-        $Course = Course::whereIn('course_number', $courseNumbers)->get();
+        $courseNumbers = Student::where('email', $userEmail)->pluck('course_id');
+        $Course = Course::whereIn('id', $courseNumbers)->get();
         return view('student.dashboard',compact( 'Course'));
     }
 }

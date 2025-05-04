@@ -33,7 +33,12 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
     Route::get('/courses_student/{id}/roster', [CourseStudentController::class, 'roster'])->middleware(['role:Student'])->name('courses_student.roster');//route for roster.
 
     // TA routes
-    Route::get('/view/courses', [TADashboardController::class, 'show'])->middleware('role:Instructor|TA')->name('ta.create-courses');
+    // Route::get('/view/courses', [TADashboardController::class, 'show'])->middleware('role:Instructor|TA')->name('ta.create-courses');    // Route::get('/view/courses', [TADashboardController::class, 'show'])->middleware('role:Instructor|TA')->name('ta.create-courses');
+    Route::get('/ta/courses/{id}', [TADashboardController::class, 'show'])->middleware('role:TA')->name('tacourses.show');
+
+    //Others
+    Route::get('/account/edit', [AccountController::class, 'edit'])->name('account.edit');
+    Route::put('/account/edit', [AccountController::class, 'update'])->name('account.update');
 
 
     // Course routes 
@@ -74,9 +79,9 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
     Route::put('/assignments/{assignment}',[AssignmentController::class, 'update'])->middleware('role:Instructor')->name('assignments.update');
     Route::delete('/assignments/{assignment}',[AssignmentController::class, 'deleteAssignment'])->middleware('role:Instructor')->name('assignments.deleteAssignment');
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->middleware('role:Instructor')->name('profile.edit');
-    Route::patch('profile/change/password', [ProfileController::class, 'update'])->middleware('role:Instructor')->name('profile.update');
-    Route::delete('/profile', action: [ProfileController::class, 'destroy'])->middleware('role:Instructor')->name('profile.destroy');
+    Route::get('/profile', [ProfileController::class, 'edit'])->middleware('role:Instructor|Ta|Student')->name('profile.edit');
+    Route::patch('profile/change/password', [ProfileController::class, 'update'])->middleware('role:Instructor|Ta|Student')->name('profile.update');
+    Route::delete('/profile', action: [ProfileController::class, 'destroy'])->middleware('role:Instructor|Ta|Student')->name('profile.destroy');
 
     Route::put('/profile/password', [PasswordController::class, 'update'])
     ->middleware('auth')

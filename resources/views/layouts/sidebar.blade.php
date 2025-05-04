@@ -11,7 +11,7 @@
             {{-- Main menu items --}}
             <ul class="space-y-2 font-medium ">
                 <!-- Your existing menu logic remains unchanged -->
-                @if (auth()->user()->getRoleNames()->contains('Instructor') || auth()->user()->getRoleNames()->contains('TA'))
+                @if (auth()->user()->getRoleNames()->contains('Instructor'))
                     <a href="{{ route('instructor.create-courses') }}" class="flex items-center px-0 pb-4 mt-6">
                         <div class="flex items-center">
                             <x-application-logo />
@@ -97,7 +97,8 @@
                             <a href="#"
                                 class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                                 <i class="fa fa-clock-o fa-lg" aria-hidden="true"></i>
-                                <span class="ms-3">Extensions</span>
+                                <span class="ms-3">Extensions</span><span
+                                    class="ml-2 text-red-600 text-sm font-medium">WIP</span>
                             </a>
                         </li>
                         <li>
@@ -121,6 +122,129 @@
                         </p>
                     </div>
                 @endif --}}
+                @elseif (auth()->user()->getRoleNames()->contains('TA'))
+                    <a href="{{ route('ta.dashboard') }}" class="flex items-center px-0 pb-4 mt-6">
+                        <div class="flex items-center">
+                            <x-application-logo />
+                            <span class="ml-3 text-2xl font-semibold dark:text-white">
+                                Mulyankan
+                            </span>
+                        </div>
+                    </a>
+                    @php
+                        $currentRoute = Route::currentRouteName();
+                        $lastOpenedCourse = session()->has('last_opened_course') ? session('last_opened_course') : null;
+                    @endphp
+
+                    @if (Route::currentRouteName() === 'ta.dashboard')
+                        <div class="px-4 py-2">
+                            <h2 class="text-2xl font-extrabold text-black tracking-wide">
+                                Welcome to <span class="text-3xl">MULYANKAN</span>
+                            </h2>
+                            <p class="text-sm mt-2 text-black leading-relaxed">
+                                A next-gen <span class="font-semibold">grading software</span> built for seamless
+                                <span class="italic">course management</span>, efficient <span class="italic">assignment
+                                    tracking</span>,
+                                and smooth <span class="italic">student evaluations</span>.
+                            </p>
+                        </div>
+                    @else
+                        <!-- <li>
+                     <a href="{{ route('instructor.create-courses') }}"
+                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <i class="fa fa-book" aria-hidden="true"></i>
+                        <span class="ms-3">Courses</span>
+                     </a>
+                   </li> -->
+                        @php
+                            $course = \App\Models\Course::find($lastOpenedCourse);
+                        @endphp
+                        @if ($course)
+                            <li class="mb-6">
+                                <div>
+                                    <div style="padding-left: 1%;">
+                                        <p class="text-gray-700 mt-1 text-lg flex items-end space-x-2">
+                                            <strong
+                                                class="text-2xl text-black font-extrabold">{{ $course->course_number }}</strong>
+                                        </p>
+                                        <div style="padding-left: 2%;">
+                                            <p>
+                                                <strong class="text-normal">{{ $course->course_name }}</strong>
+                                            </p>
+                                            <span class="text-gray-1000 text-sm">{{ $course->term }}
+                                                {{ $course->year }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="md:text-right"></div>
+                                </div>
+                            </li>
+                        @endif
+                        <li>
+                            <a href="{{ route('tacourses.show', $lastOpenedCourse) }}"
+                                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                                <i class="fa fa-tasks" aria-hidden="true"></i>
+                                <span class="ms-3">Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('assignments.index', $lastOpenedCourse) }}"
+                                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                                <i class="fa fa-file-text" aria-hidden="true"></i>
+                                <span class="ms-3">Assignments</span>
+                            </a>
+                        </li>
+                        {{-- <li>
+                        <a href="{{ route('courses.roster', $lastOpenedCourse) }}"
+                            class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            <i class="fa fa-users" aria-hidden="true"></i>
+                            <span class="ms-3">Roster</span>
+                        </a>
+                    </li> --}}
+                        <li>
+                            <a href="#"
+                                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                                <i class="fa fa-clock-o fa-lg" aria-hidden="true"></i>
+                                <span class="ms-3">Extensions</span><span
+                                    class="ml-2 text-red-600 text-sm font-medium">WIP</span>
+                            </a>
+                        </li>
+                        {{-- <li>
+                        <a href="{{ route('courses.settings', $lastOpenedCourse) }}"
+                            class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            <i class="fa fa-cog fa-lg" aria-hidden="true"></i>
+                            <span class="ms-3">Course Settings</span>
+                        </a>
+                    </li> --}}
+                    @endif
+                    {{-- @elseif (auth()->user()->getRoleNames()->contains('Student'))
+                <div class="px-4 py-2">
+                    <h2 class="text-2xl font-extrabold text-black tracking-wide">
+                        Welcome to <span class="text-3xl">MULYANKAN</span>
+                    </h2>
+                    <p class="text-sm mt-2 text-black leading-relaxed">
+                        A next-gen <span class="font-semibold">grading software</span> built for seamless
+                        <span class="italic">course management</span>, efficient <span class="italic">assignment
+                            tracking</span>,
+                        and smooth <span class="italic">student evaluations</span>.
+                    </p>
+                </div>
+            @endif --}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                     {{-- Student sidebar --}}
                 @elseif (auth()->user()->getRoleNames()->contains('Student'))
@@ -161,18 +285,19 @@
                                     <span class="ms-3">Dashboard</span>
                                 </a>
                             </li>
-                            <li>
+                            {{-- <li>
                                 <a href="{{ route('courses_student.roster', $lastOpenedCourse) }}"
                                     class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                                     <i class="fa fa-users" aria-hidden="true"></i>
                                     <span class="ms-3">Roster</span>
                                 </a>
-                            </li>
+                            </li> --}}
                             <li>
                                 <a href="#"
                                     class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                                     <i class="fa fa-refresh" aria-hidden="true"></i>
-                                    <span class="ms-3">Regrade Request</span>
+                                    <span class="ms-3">Regrade Request</span><span
+                                        class="ml-2 text-red-600 text-sm font-medium">WIP</span>
                                 </a>
                             </li>
                         @endif
@@ -183,7 +308,8 @@
                             </h2>
                             <p class="text-sm mt-2 text-black leading-relaxed">
                                 A next-gen <span class="font-semibold">grading software</span> built for seamless
-                                <span class="italic">course management</span>, efficient <span class="italic">assignment
+                                <span class="italic">course management</span>, efficient <span
+                                    class="italic">assignment
                                     tracking</span>,
                                 and smooth <span class="italic">student evaluations</span>.
                             </p>

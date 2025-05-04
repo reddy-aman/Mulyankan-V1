@@ -7,43 +7,24 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\TA;
 use App\Models\Course;
+use App\Models\Assignment;
 
 class TADashboardController extends Controller
 {
     public function index()
     {
         $userEmail = Auth::user()->email;
-        $courseNumbers = TA::where('email', $userEmail)->pluck('course_number');
-        $Course = Course::whereIn('course_number', $courseNumbers)->get();
+        $courseNumbers = TA::where('email', $userEmail)->pluck('course_id');
+        $Course = Course::whereIn('id', $courseNumbers)->get();
         
-        return view('ta.dashboard',compact( 'Course'));
+        return view('ta.dashboard',compact('Course'));
     }
-    public function show($courseId)
+    public function show($id)
     {
-        // Retrieve the course based on the provided course ID.
-        $lastOpenedCourse = Course::findOrFail($courseId);
-
-        // Optionally load related data, e.g. assignments for this course.
-        $assignments = Assignment::where('course_number', $lastOpenedCourse->course_number)->get();
-
-        // Pass the necessary variables to the view.
-        return view('instructor.show', compact('lastOpenedCourse', 'assignments'));
-    }
-    public function index2()
-    {
-        $terms = DB::table(table: 'attributes')->where('type', 'term')->pluck('value', 'id');
-        $years = DB::table('attributes')->where('type', 'year')->pluck('value', 'id');
-        $departments = DB::table('attributes')->where('type', 'department')->pluck('value', 'id');
-
-        $Course = DB::table(table: 'courses')->where('instructor_id', auth()->id())->get();
-
-        // $aman = "Some value from showCourses";
-
-        //dd($Course);
-
-        $role = auth()->user()->getRoleNames()->first(); // Get the first role
-
-        return view('instructor.create-courses', compact('role', 'terms', 'years', 'departments', 'Course'));
+        $course = Course::where('id', $id)->firstOrFail();
+        $assignments = Assignment::where('course_number', $course->id)->get();
+        session(['last_opened_course' => $id]);
+        return view('ta.show', compact('course', 'assignments'));
     }
 }
  
