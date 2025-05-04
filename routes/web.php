@@ -1,15 +1,15 @@
 <?php
 
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Instructor\InstructorDashboardController;
 use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Student\CourseStudentController;
 use App\Http\Controllers\TA\TADashboardController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Instructor\MulyankanCoursesController;
 use App\Http\Controllers\Instructor\RosterController;
-use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Instructor\AssignmentController;
 
 // Welcome page (public route)
@@ -73,6 +73,14 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
     Route::get('/assignments/{assignment}/edit',[AssignmentController::class, 'edit'])->middleware('role:Instructor')->name('assignments.edit');
     Route::put('/assignments/{assignment}',[AssignmentController::class, 'update'])->middleware('role:Instructor')->name('assignments.update');
     Route::delete('/assignments/{assignment}',[AssignmentController::class, 'deleteAssignment'])->middleware('role:Instructor')->name('assignments.deleteAssignment');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->middleware('role:Instructor')->name('profile.edit');
+    Route::patch('profile/change/password', [ProfileController::class, 'update'])->middleware('role:Instructor')->name('profile.update');
+    Route::delete('/profile', action: [ProfileController::class, 'destroy'])->middleware('role:Instructor')->name('profile.destroy');
+
+    Route::put('/profile/password', [PasswordController::class, 'update'])
+    ->middleware('auth')
+    ->name('password.update');
 
 });
 

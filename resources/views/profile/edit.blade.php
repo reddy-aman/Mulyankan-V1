@@ -4,7 +4,7 @@
             {{ __('Profile') }}
         </h2>
     </x-slot>
-
+ 
     <div class="p-4 sm:ml-64 Courses-card">
 <div class="p-4 rounded-lg bg-white">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">

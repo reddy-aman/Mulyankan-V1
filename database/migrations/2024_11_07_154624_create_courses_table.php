@@ -17,7 +17,7 @@ class CreateCoursesTable extends Migration
             $table->string('term')->nullable();
             $table->string(column: 'year')->nullable();
             $table->string('department')->nullable();
-            $table->foreignId('instructor_id')->constrained('users'); // Assuming instructor is stored in users table
+            $table->foreignId('instructor_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }
