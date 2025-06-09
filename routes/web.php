@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Instructor\MulyankanCoursesController;
 use App\Http\Controllers\Instructor\RosterController;
 use App\Http\Controllers\Instructor\AssignmentController;
+use App\Http\Controllers\AccountController;
+
 
 // Welcome page (public route)
 Route::get('/', function () {
@@ -78,7 +80,13 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
     Route::get('/assignments/{assignment}/edit',[AssignmentController::class, 'edit'])->middleware('role:Instructor')->name('assignments.edit');
     Route::put('/assignments/{assignment}',[AssignmentController::class, 'update'])->middleware('role:Instructor')->name('assignments.update');
     Route::delete('/assignments/{assignment}',[AssignmentController::class, 'deleteAssignment'])->middleware('role:Instructor')->name('assignments.deleteAssignment');
+    Route::post('/assignments/{assignment}/store-roll-numbers', [AssignmentController::class, 'storeRollNumbers'])->name('assignments.storeRollNumbers');
+    Route::get(
+        'assignments/{assignment}/verify-rolls',
+        [AssignmentController::class, 'verifyRollNumbers']
+    )->name('assignments.verifyRollNumbers');
 
+    
     Route::get('/profile', [ProfileController::class, 'edit'])->middleware('role:Instructor|Ta|Student')->name('profile.edit');
     Route::patch('profile/change/password', [ProfileController::class, 'update'])->middleware('role:Instructor|Ta|Student')->name('profile.update');
     Route::delete('/profile', action: [ProfileController::class, 'destroy'])->middleware('role:Instructor|Ta|Student')->name('profile.destroy');

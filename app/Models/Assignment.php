@@ -18,6 +18,7 @@ class Assignment extends Model
         'status',            // e.g., published or not
         'submissions_count', // optional
         'template_id',
+        'pages',
         'type',
     ];
 

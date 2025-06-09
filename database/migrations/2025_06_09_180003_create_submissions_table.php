@@ -20,6 +20,7 @@ class CreateSubmissionsTable extends Migration
             $table->timestamps();
     
             $table->foreign('assignment_id')->references('id')->on('assignments')->onDelete('cascade');
+            // $table->foreign('roll_no')->references('sid')->on('students')->onDelete('cascade');
         });
     }
     

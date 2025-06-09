@@ -14,6 +14,7 @@ class Assignment_Annotation extends Model
         'left',
         'width',
         'height',
+        'scale',
         'name',
         'assignment_id'
     ];

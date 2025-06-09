@@ -56,6 +56,13 @@
 
             </label>
 
+            <div class="mb-6">
+                <label class="inline-flex items-center">
+                    <input type="checkbox" name="is_rotated" value="1" class="form-checkbox text-blue-600">
+                    <span class="ml-2 text-gray-700">Is PDF rotated?</span>
+                </label>
+            </div>
+
             <!-- Buttons -->
             <div class="flex justify-between items-center">
                 @php

@@ -12,10 +12,7 @@ class CoursesdetailsTableSeeder extends Seeder
     {
         $data = [
             ['type' => 'term', 'value' => 'Spring'],
-            ['type' => 'term', 'value' => 'Summer'],
-            ['type' => 'term', 'value' => 'Fall'],
-            ['type' => 'term', 'value' => 'Winter'],
-            ['type' => 'year', 'value' => '2024'],
+            ['type' => 'term', 'value' => 'Autumn'],
             ['type' => 'year', 'value' => '2025'],
             ['type' => 'year', 'value' => '2026'],
             ['type' => 'year', 'value' => '2027'],

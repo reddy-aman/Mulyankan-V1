@@ -86,6 +86,8 @@
 
     <script>
         window.initialAnnotations = @json($annotations ?? []);
+        let globalScale = 1; 
+
         document.addEventListener("DOMContentLoaded", function () {
             let pdfDoc = null;
             let annotationData = window.initialAnnotations || {};
@@ -171,6 +173,8 @@
                     const desiredWidth = container.clientWidth - 40;
                     const unscaledViewport = page.getViewport({ scale: 1 });
                     const scale = desiredWidth / unscaledViewport.width;
+                    globalScale=scale;
+
                     const viewport = page.getViewport({ scale });
 
                     canvas.width = viewport.width;
@@ -400,13 +404,20 @@
 
             // "Save Annotations" button event handler: send annotationData to the server via AJAX
             document.getElementById("save-btn").addEventListener("click", function () {
+                
+                const payload = {
+                        scale: globalScale,
+                        annotations: annotationData
+                    };
+                console.log("Sending annotationData:", payload);
+
                 fetch("{{ route('assignments.saveAnnotation') }}", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         "X-CSRF-TOKEN": "{{ csrf_token() }}"
                     },
-                    body: JSON.stringify(annotationData)
+                    body: JSON.stringify(payload)
                 })
                     .then(response => {
                         console.log("Raw response:", response); // Log the raw response

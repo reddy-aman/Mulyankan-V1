@@ -15,6 +15,7 @@ class CreateAssignmentAnnotationsTable extends Migration
             $table->float('left');
             $table->float('width');
             $table->float('height');
+            $table->float('scale');
             $table->string('name');
             $table->unsignedBigInteger('assignment_id');
             $table->timestamps();

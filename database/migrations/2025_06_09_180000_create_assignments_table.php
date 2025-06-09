@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('status');   // e.g., published/active status
             $table->integer('submissions_count')->default(0);
             $table->unsignedBigInteger('template_id');
+            $table->unsignedBigInteger('pages');
             $table->string('type');
             $table->timestamps();
 

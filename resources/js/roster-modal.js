@@ -121,6 +121,7 @@ $(document).ready(function () {
             success: function (response) {
                 if (response.success) {
                     window.location.href = window.rosterShowUrl;
+                    location.reload();
                 } else {
                     alert("Error: " + response.message);
                 }
