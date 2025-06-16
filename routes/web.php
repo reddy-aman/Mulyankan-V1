@@ -85,6 +85,22 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
         'assignments/{assignment}/verify-rolls',
         [AssignmentController::class, 'verifyRollNumbers']
     )->name('assignments.verifyRollNumbers');
+    Route::get(
+        'submissions/view/{path}',
+        [AssignmentController::class, 'viewPart']
+    )->name('submissions.viewPart')
+      ->where('path', '.*');
+      Route::get(
+        'submissions/thumb/{path}',
+        [AssignmentController::class, 'thumbnail']
+    )->name('submissions.thumbnail')
+      ->where('path', '.*');
+      Route::post('/assignments/finalize-submission', [AssignmentController::class, 'finalizeSubmission'])
+      ->name('assignments.finalizeSubmission');
+      Route::get('assignments/{assignment}/manageSubmission', [AssignmentController::class, 'manageSubmission'])->middleware('role:Instructor|TA')->name('assignments.manageSubmission');
+    //   Route::post('assignments/{assignment}/submit', [AssignmentController::class, 'upload'])->middleware('role:Instructor|TA')->name('assignments.upload');
+
+
 
     
     Route::get('/profile', [ProfileController::class, 'edit'])->middleware('role:Instructor|Ta|Student')->name('profile.edit');

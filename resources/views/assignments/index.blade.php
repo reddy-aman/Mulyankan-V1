@@ -9,7 +9,7 @@
         <div class="flex-1 flex flex-col p-6 bg-gray-50">
             @php
                 $lastOpenedCourse = session('last_opened_course');
-                $stages = ['Edit Outline', 'Submission Uploaded', 'Submission Graded', 'Grade Reviewed'];
+                $stages = ['Edit Outline', 'Submission Uploaded', 'Manage Submission', 'Submission Graded', 'Grade Reviewed'];
             @endphp
 
             <!-- Top Bar -->
@@ -91,6 +91,9 @@
                                                                 break;
                                                             case 'Submission Graded':
                                                                 $url = '';
+                                                                break;
+                                                            case 'Manage Submission':
+                                                                $url = route('assignments.manageSubmission', $assignment->id);;
                                                                 break;
                                                             case 'Grade Reviewed':
                                                                 $url = '';

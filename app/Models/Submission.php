@@ -14,8 +14,7 @@ class Submission extends Model
      */
     protected $fillable = [
         'assignment_id',
-        'roll_no',
-        'dept',
+        'file_name',
         'file_path',
     ];
 
