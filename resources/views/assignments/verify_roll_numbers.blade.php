@@ -1,196 +1,205 @@
 <x-app-layout>
-    <div class="py-4">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="flex items-center mb-8 space-x-4">
-                <h2 class="text-3xl font-extrabold text-gray-900">
-                    Verify Roll Numbers
-                    <span class="block text-lg font-normal text-gray-600">
-                        for Assignment <span class="text-blue-600">{{ $assignment->Name }}</span>
-                    </span>
-                </h2>
-            </div>
+    <div class="py-4 flex">
+        {{-- Sidebar --}}
+        <aside class="w-64 bg-white shadow-md px-4 py-6">…</aside>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <form id="rollForm"
-                      action="{{ route('assignments.storeRollNumbers', $assignment->id) }}"
-                      method="POST">
-                    @csrf
+        {{-- Main --}}
+        <div class="flex-1 px-6">
+            <h2 class="text-3xl font-extrabold mb-6">
+                Verify Roll Numbers
+                <span class="block text-lg font-normal text-gray-600">
+                    for Assignment <span class="text-blue-600">{{ $assignment->Name }}</span>
+                </span>
+            </h2>
 
-                    @foreach ($submissionParts as $part)
-                        <div class="submission-snippet mb-6 flex flex-col md:flex-row items-start gap-4">
-                            <div class="w-full md:w-1/2">
-                                <img src="{{ $part->snippetPath }}"
-                                     alt="Roll Number Snippet"
-                                     class="border border-gray-300 max-w-full" />
+            <div class="bg-white shadow-sm rounded-lg p-6 flex">
+                <div class="w-full max-w-4xl">
+                    <form action="{{ route('assignments.storeRollNumbers', $assignment->id) }}" method="POST">
+                        @csrf
+
+                        @foreach ($submissionParts as $part)
+                            <div class="submission-snippet mb-6 flex items-start space-x-6">
+                                <div class="relative inline-block m-0 p-0">
+                                    <img src="{{ $part->snippetPath }}" alt="Roll Number Snippet"
+                                        class="border border-gray-300 max-w-full rounded" />
+
+                                    <button type="button"
+                                        class="absolute top-1 right-1 bg-white p-1 rounded-full shadow zoom-full"
+                                        data-path="{{ $part->file_path }}" title="View Full Page">
+                                        <i class="fa fa-search-plus"></i>
+                                    </button>
+                                </div>
+
+                                <div class="flex-1">
+                                    <input type="hidden" name="parts[{{ $part->index }}][split_id]"
+                                        value="{{ $part->split_id }}">
+
+                                    <label for="roll_number_{{ $part->index }}"
+                                        class="block mb-1 font-medium text-gray-700">Roll Number</label>
+
+                                    <input type="hidden" name="roll_numbers[{{ $part->index }}]"
+                                        id="hidden_roll_number_{{ $part->index }}" value="{{ $part->roll_no ?? '' }}">
+
+                                    <input type="text" id="roll_number_{{ $part->index }}"
+                                        class="roll-input border border-gray-300 rounded px-3 py-2 w-64"
+                                        placeholder="Select Roll number" autocomplete="off"
+                                        value="{{ $part->roll_no ?? '' }}">
+
+                                    <div class="dropdown-list absolute z-10 bg-white border border-gray-300 rounded max-h-48 overflow-auto hidden"
+                                        style="width:16rem;"></div>
+                                </div>
                             </div>
-                            <div class="w-full md:w-1/2 relative">
-                                <label for="roll_number_{{ $part->index }}" class="block mb-1">
-                                    Roll Number
-                                </label>
+                        @endforeach
 
-                                {{-- Preserve the chunk’s PDF path for saving later --}}
-                                <input type="hidden"
-                                       name="parts[{{ $part->index }}][file_path]"
-                                       value="{{ $part->file_path }}" />
-
-                                {{-- Hidden input to store the chosen roll number --}}
-                                <input type="hidden"
-                                       name="roll_numbers[{{ $part->index }}]"
-                                       id="hidden_roll_number_{{ $part->index }}"
-                                       required />
-
-                                {{-- User-facing autocomplete box --}}
-                                <input type="text"
-                                       id="roll_number_{{ $part->index }}"
-                                       class="roll-input border border-gray-300 rounded px-3 py-2 w-64 mb-4"
-                                       placeholder="Select Roll number"
-                                       autocomplete="off" />
-
-                                <div class="dropdown-list absolute z-10 w-64 bg-white border border-gray-300 rounded max-h-48 overflow-auto hidden"></div>
-                            </div>
-                        </div>
-                    @endforeach
-
-                    <button type="submit"
-                            class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
-                        Save Roll Numbers
-                    </button>
-                </form>
+                        <button type="submit"
+                            class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
+                            Save Roll Numbers
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
+    <div id="fullpage-lightbox"
+        class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex items-center justify-center">
+
+        <!-- Close button at top-right of screen -->
+        <button id="lightbox-close"
+            class="fixed top-4 right-4 bg-red-600 bg-opacity-90 text-white text-3xl z-50 px-3 py-1 rounded hover:bg-red-500"
+            title="Close">&times;</button>
+
+        <!-- Centered and stretched image -->
+        <img id="lightbox-img" class="w-auto h-full max-h-screen object-contain" src="" alt="Full Page" />
+    </div>
+
+
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const students = @json($students);
+        document.addEventListener('DOMContentLoaded', function () {
+            const students = @json($students);
 
-        function isValidRollNumber(val) {
-            if (!val) return false;
-            val = val.trim().toLowerCase();
-            return students.some(s => s.sid.toLowerCase() === val);
-        }
+            @foreach ($submissionParts as $part)
+                (function () {
+                    const idx = {{ $part->index }};
+                    const input = document.getElementById(`roll_number_${idx}`);
+                    const hiddenInput = document.getElementById(`hidden_roll_number_${idx}`);
+                    const dropdown = input.nextElementSibling;
+                    let selectedIndex = -1;
 
-        @foreach ($submissionParts as $part)
-        (function() {
-            const idx         = {{ $part->index }};
-            const input       = document.getElementById(`roll_number_${idx}`);
-            const hiddenInput = document.getElementById(`hidden_roll_number_${idx}`);
-            const dropdown    = input.nextElementSibling;
-            let selectedIndex = -1;
+                    function filterStudents(q) {
+                        q = q.trim().toLowerCase();
+                        return students.filter(s =>
+                            s.sid.toLowerCase().includes(q) ||
+                            s.name.toLowerCase().includes(q) ||
+                            s.email.toLowerCase().includes(q)
+                        ).slice(0, 5);
+                    }
 
-            function filterStudents(query) {
-                query = query.toLowerCase();
-                return students
-                    .filter(s =>
-                        s.sid.toLowerCase().includes(query) ||
-                        s.name.toLowerCase().includes(query) ||
-                        s.email.toLowerCase().includes(query)
-                    )
-                    .slice(0, 5);
-            }
+                    function render(matches) {
+                        if (!matches.length) {
+                            dropdown.innerHTML = `<div class="p-2 text-gray-500">No matches</div>`;
+                        } else {
+                            dropdown.innerHTML = matches.map((s, i) =>
+                                `<div class="dropdown-item p-2 cursor-pointer hover:bg-blue-100 ${selectedIndex === i ? 'bg-blue-100' : ''}"
+                      data-sid="${s.sid}">
+                  <strong>${s.sid}</strong><br>
+                  <span>${s.name}</span><br>
+                  <small class="text-gray-500">${s.email}</small>
+                </div>`
+                            ).join('');
+                        }
+                        dropdown.classList.remove('hidden');
+                    }
 
-            function renderDropdown(matches) {
-                if (!matches.length) {
-                    dropdown.innerHTML = '<div class="p-2 text-gray-500">No matching students</div>';
-                } else {
-                    dropdown.innerHTML = matches.map((s, i) => `
-                        <div class="dropdown-item cursor-pointer p-2 hover:bg-blue-100 ${selectedIndex === i ? 'bg-blue-100' : ''}"
-                             data-rollnumber="${s.sid}">
-                            <div><strong>${s.sid}</strong></div>
-                            <div>${s.name}</div>
-                            <div class="text-sm text-gray-500">${s.email}</div>
-                        </div>
-                    `).join('');
-                }
-                dropdown.classList.remove('hidden');
-            }
+                    function hide() {
+                        dropdown.classList.add('hidden');
+                        selectedIndex = -1;
+                    }
 
-            function hideDropdown() {
-                dropdown.classList.add('hidden');
-                selectedIndex = -1;
-            }
+                    function select(i) {
+                        const item = dropdown.querySelectorAll('.dropdown-item')[i];
+                        if (item) {
+                            input.value = item.dataset.sid;
+                            hiddenInput.value = item.dataset.sid;
+                        }
+                        hide();
+                    }
 
-            function selectItem(i) {
-                const items = dropdown.querySelectorAll('.dropdown-item');
-                if (items[i]) {
-                    const sid = items[i].dataset.rollnumber;
-                    input.value       = sid;
-                    hiddenInput.value = sid;
-                }
-                hideDropdown();
-            }
+                    input.addEventListener('input', () => {
+                        selectedIndex = -1;
+                        hiddenInput.value = '';
+                        const m = filterStudents(input.value);
+                        m.length ? render(m) : hide();
+                    });
+                    input.addEventListener('focus', () => render(students.slice(0, 5)));
+                    input.addEventListener('keydown', e => {
+                        const items = dropdown.querySelectorAll('.dropdown-item');
+                        if (!items.length) return;
+                        if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            selectedIndex = (selectedIndex + 1) % items.length;
+                            render(filterStudents(input.value));
+                            items[selectedIndex].scrollIntoView({ block: 'nearest' });
+                        } else if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+                            render(filterStudents(input.value));
+                            items[selectedIndex].scrollIntoView({ block: 'nearest' });
+                        } else if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (selectedIndex >= 0) select(selectedIndex);
+                        }
+                    });
+                    dropdown.addEventListener('click', e => {
+                        const itm = e.target.closest('.dropdown-item');
+                        if (!itm) return;
+                        input.value = itm.dataset.sid;
+                        hiddenInput.value = itm.dataset.sid;
+                        hide();
+                    });
+                    document.addEventListener('click', e => {
+                        if (!input.contains(e.target) &&
+                            !dropdown.contains(e.target) &&
+                            !e.target.closest('.zoom-full')) {
+                            hide();
+                        }
+                    });
+                })();
+            @endforeach
 
-            input.addEventListener('input', function() {
-                const val = input.value.trim();
-                selectedIndex = -1;
-                hiddenInput.value = '';
-                const matches = val ? filterStudents(val) : students.slice(0, 5);
-                matches.length ? renderDropdown(matches) : hideDropdown();
+            document.querySelectorAll('.zoom-full').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const path = btn.dataset.path;
+                    const url = new URL("{{ route('submissions.thumbnail', '__PATH__') }}".replace('__PATH__', encodeURIComponent(path)), window.location.origin);
+                    url.searchParams.set('page', '1');
+                    url.searchParams.set('size', 'full');
+
+                    const lightbox = document.getElementById('fullpage-lightbox');
+                    const img = document.getElementById('lightbox-img');
+
+                    img.classList.add('hidden'); // hide until loaded
+                    img.onload = () => {
+                        img.classList.remove('hidden');
+                    };
+
+                    img.src = url.toString();
+                    lightbox.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                });
             });
 
-            input.addEventListener('focus', function() {
-                selectedIndex = -1;
-                renderDropdown(students.slice(0, 5));
-            });
 
-            input.addEventListener('keydown', function(e) {
-                const items = dropdown.querySelectorAll('.dropdown-item');
-                if (!items.length) return;
-
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    selectedIndex = (selectedIndex + 1) % items.length;
-                    renderDropdown(filterStudents(input.value));
-                    items[selectedIndex].scrollIntoView({ block: 'nearest' });
-                }
-                else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    selectedIndex = (selectedIndex - 1 + items.length) % items.length;
-                    renderDropdown(filterStudents(input.value));
-                    items[selectedIndex].scrollIntoView({ block: 'nearest' });
-                }
-                else if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (selectedIndex >= 0) selectItem(selectedIndex);
-                }
+            document.getElementById('lightbox-close').addEventListener('click', () => {
+                document.getElementById('fullpage-lightbox').classList.add('hidden');
+                document.body.style.overflow = '';
             });
-
-            dropdown.addEventListener('click', function(e) {
-                const item = e.target.closest('.dropdown-item');
-                if (!item) return;
-                input.value       = item.dataset.rollnumber;
-                hiddenInput.value = item.dataset.rollnumber;
-                hideDropdown();
-            });
-
-            document.addEventListener('click', function(e) {
-                if (!input.contains(e.target) && !dropdown.contains(e.target)) {
-                    hideDropdown();
-                }
-            });
-        })();
-        @endforeach
-
-        // Validate on submit
-        document.getElementById('rollForm').addEventListener('submit', function(e) {
-            let allValid = true;
-            document.querySelectorAll('.roll-input').forEach(input => {
-                if (!isValidRollNumber(input.value.trim())) {
-                    allValid = false;
-                }
-            });
-            if (!allValid) {
-                e.preventDefault();
-                alert('Please fill all roll number fields with a valid roll number before saving.');
-            }
         });
-    });
+
     </script>
 
     <style>
         .dropdown-list {
-            max-height: calc(5 * 3rem);
-            overflow-y: auto;
+            max-height: 12rem;
         }
     </style>
 </x-app-layout>

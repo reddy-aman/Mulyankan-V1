@@ -80,24 +80,19 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
     Route::get('/assignments/{assignment}/edit',[AssignmentController::class, 'edit'])->middleware('role:Instructor')->name('assignments.edit');
     Route::put('/assignments/{assignment}',[AssignmentController::class, 'update'])->middleware('role:Instructor')->name('assignments.update');
     Route::delete('/assignments/{assignment}',[AssignmentController::class, 'deleteAssignment'])->middleware('role:Instructor')->name('assignments.deleteAssignment');
-    Route::post('/assignments/{assignment}/store-roll-numbers', [AssignmentController::class, 'storeRollNumbers'])->name('assignments.storeRollNumbers');
-    Route::get(
-        'assignments/{assignment}/verify-rolls',
-        [AssignmentController::class, 'verifyRollNumbers']
-    )->name('assignments.verifyRollNumbers');
-    Route::get(
-        'submissions/view/{path}',
-        [AssignmentController::class, 'viewPart']
-    )->name('submissions.viewPart')
+    Route::post('/assignments/{assignment}/store-roll-numbers',[AssignmentController::class, 'storeRollNumbers'])->name('assignments.storeRollNumbers');
+    Route::get('assignments/{assignment}/verify-rolls/{submission}',[AssignmentController::class, 'verifyRollNumbers'])->name('assignments.verifyRollNumbers');
+    Route::get('submissions/view/{path}',[AssignmentController::class, 'viewPart'])->name('submissions.viewPart')
       ->where('path', '.*');
-      Route::get(
-        'submissions/thumb/{path}',
-        [AssignmentController::class, 'thumbnail']
-    )->name('submissions.thumbnail')
+    Route::get('submissions/thumb/{path}',[AssignmentController::class, 'thumbnail'])->name('submissions.thumbnail')
       ->where('path', '.*');
-      Route::post('/assignments/finalize-submission', [AssignmentController::class, 'finalizeSubmission'])
-      ->name('assignments.finalizeSubmission');
-      Route::get('assignments/{assignment}/manageSubmission', [AssignmentController::class, 'manageSubmission'])->middleware('role:Instructor|TA')->name('assignments.manageSubmission');
+    Route::post('/assignments/finalize-submission', [AssignmentController::class, 'finalizeSubmission'])->name('assignments.finalizeSubmission');
+    Route::get('assignments/{assignment}/manageSubmission', [AssignmentController::class, 'manageSubmission'])->middleware('role:Instructor|TA')->name('assignments.manageSubmission');
+    Route::delete('assignments/{assignment}/submissions/{submission}',[AssignmentController::class, 'destroySubmission'])->name('assignments.destroySubmission');
+    Route::get('submissions/crop-snippet/{path}', [AssignmentController::class, 'cropSnippet'])->where('path', '.*')
+     ->name('submissions.cropSnippet');
+
+
     //   Route::post('assignments/{assignment}/submit', [AssignmentController::class, 'upload'])->middleware('role:Instructor|TA')->name('assignments.upload');
 
 

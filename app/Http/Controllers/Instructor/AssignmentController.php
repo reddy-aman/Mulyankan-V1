@@ -13,9 +13,8 @@ use App\Models\SplitSubmission;
 use Imagick;
 use App\Models\Student;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
 
 class AssignmentController extends Controller
 {
@@ -153,92 +152,87 @@ class AssignmentController extends Controller
     {
         return view('assignments.upload-submission', compact('assignmentId'));
     }
-    // public function uploadForm($assignmentId)
-    // {
-    //     $assignment = Assignment::findOrFail($assignmentId);
-    //     $submission = Submission::where('assignment_id', $assignment->id)->firstOrFail();
-    //     $splitSubmissions = SplitSubmission::where('submission_id', $submission->id)
-    //     ->pluck('file_path');
-    
-    //     Log::info('Split Submission File Paths:', $splitSubmissions->toArray());
 
-    //     $allPages = [];
+    public function manageSubmission(int $assignmentId)
+    {
+        $assignment = Assignment::findOrFail($assignmentId);
 
-    //     foreach ($splitSubmissions as $path) {
-    //         $fullPath = storage_path($path);
-            
-    //         $cmd = "pdfinfo " . escapeshellarg($fullPath) . " | awk '/Pages:/ {print $2}'";
-    //         $totalPages = intval(trim(shell_exec($cmd)));
-        
-    //         for ($i = 1; $i <= $totalPages; $i++) {
-    //             $allPages[] = [
-    //                 'file_path' => $path,
-    //                 'page_number' => $i,
-    //             ];
-    //         }
-    //     }
-        
-    //     return view('assignments.upload-submission', [
-    //         'assignmentId' => $assignmentId,
-    //         'submissionPages' => $allPages,
-    //     ]);
-    
-    // }
-// app/Http/Controllers/AssignmentController.php
+        $submissions = Submission::where('assignment_id', $assignment->id)
+            ->orderBy('created_at', 'asc')
+            ->get();
 
-// In app/Http/Controllers/SubmissionController.php
+        $allParts = [];
 
-// In app/Http/Controllers/SubmissionController.php
+        foreach ($submissions as $submission) {
+            $splits= SplitSubmission::where('submission_id', $submission->id)
+                ->orderBy('id')
+                ->get();
 
-public function manageSubmission(int $assignmentId)
-{
-    $assignment = Assignment::findOrFail($assignmentId);
+            $totalParts     = 0;
+            $unassigned     = 0;
+            $submissionParts = [];
+            foreach ($splits as $idx => $split) {
+                $relative = $split->file_path;
+                $full = storage_path("app/$relative");
+                $total = intval(trim(shell_exec(
+                    "pdfinfo " . escapeshellarg($full) . " | awk '/Pages:/ {print \$2}'"
+                )));
 
-    // grab the one Submission record for this assignment
-    $submission = Submission::where('assignment_id', $assignment->id)
-        ->firstOrFail();
+                $submissionParts[] = [
+                    'part_number' => $idx + 1,
+                    'file_path' => $relative,
+                    'pages' => range(1, $total),
+                    'roll_no'     => $split->roll_no,
+                ];
 
-    // get the list of split-PDF relative paths, in order
-    $splitPaths = SplitSubmission::where('submission_id', $submission->id)
-        ->orderBy('id')
-        ->pluck('file_path')
-        ->toArray();
+                $totalParts++;
+                if (empty($split->roll_no)) {
+                    $unassigned++;
+                }
+            }
 
-    $submissionParts = [];
+            $allParts[] = [
+                'submission' => $submission,
+                'parts' => $submissionParts,
+                'totalParts'      => $totalParts,
+                'unassignedCount' => $unassigned,
+            ];
+        }
 
-    foreach ($splitPaths as $idx => $relative) {
-        $full = storage_path("app/$relative");
-        $cmd  = "pdfinfo " . escapeshellarg($full) . " | awk '/Pages:/ {print \$2}'";
-        $total = intval(trim(shell_exec($cmd)));
-
-        Log::info('Running shell command:', ['cmd' => $cmd]);
-        Log::info('pdfinfo returned total pages:', [
-            'total_pages' => $total,
+        return view('assignments.manage-submission', [
+            'assignment' => $assignment,
+            'allSubmissions' => $allParts,
         ]);
-
-        $submissionParts[] = [
-            'part_number' => $idx + 1,
-            'file_path'   => $relative,
-            'pages'       => range(1, $total),
-        ];
     }
 
-    Log::info('Built submissionParts for manageSubmission():', [
-        'assignment_id'    => $assignmentId,
-        'submission_id'    => $submission->id,
-        'submissionParts'  => $submissionParts,
-      ]);
 
-    return view('assignments.manage-submission', [
-        'assignment'      => $assignment,
-        'submissionParts' => $submissionParts,
-    ]);
-}
+    public function destroySubmission(Assignment $assignment, Submission $submission)
+    {
+        $splitPaths = SplitSubmission::where('submission_id', $submission->id)
+            ->pluck('file_path')   // e.g. ["private/submissions/.../folder/part1.pdf", ...]
+            ->unique();            // in case there are multiple parts
 
+        // 2) For each path, delete its parent directory
+        foreach ($splitPaths as $relative) {
+            // dirname("private/.../folder/part1.pdf") -> "private/.../folder"
+            $fullDir = storage_path('app/' . dirname($relative));
 
+            if (File::isDirectory($fullDir)) {
+                File::deleteDirectory($fullDir);
+            } else {
+                Log::warning("Directory not found on disk", ['fullDir' => $fullDir]);
+            }
+        }
 
+        // 3) Remove the DB records
+        SplitSubmission::where('submission_id', $submission->id)->delete();
+        $submission->delete();
 
-    
+        return redirect()
+            ->route('assignments.manageSubmission', $assignment->id)
+            ->with('success', 'Submission deleted successfully.');
+    }
+
     // private function handleRotation(Request $request, string $fullPath, string $originalFilename): string
     // {
     //     if ($request->has('is_rotated') && $request->boolean('is_rotated')) {
@@ -486,13 +480,7 @@ public function manageSubmission(int $assignmentId)
     public function thumbnail(Request $request, string $path)
     {
         $page = max(1, intval($request->query('page', 1)));
-        $size = $request->query('size', 'thumb'); // default to 'thumb'
-
-        Log::info('Generating thumbnail', [
-            'path' => $path,
-            'page' => $page,
-            'size' => $size,
-        ]);
+        $size = $request->query('size', 'thumb');
 
         $fullPdf = storage_path("app/{$path}");
         if (!file_exists($fullPdf)) {
@@ -515,178 +503,207 @@ public function manageSubmission(int $assignmentId)
         return response($im->getImageBlob(), 200)
             ->header('Content-Type', 'image/png');
     }
-    
+
     public function finalizeSubmission(Request $request)
     {
         $submissionId = $request->submission_id;
         $assignmentId = $request->assignment_id;
         $customFolder = $request->custom_folder;
         $rotationData = json_decode($request->input('rotations', '{}'), true);
-    
-        Log::info('→ finalizeSubmission() started', compact(
-            'submissionId', 'assignmentId', 'customFolder', 'rotationData'
-        ));
-    
-        $assignment     = Assignment::findOrFail($assignmentId);
+        $deletedData = json_decode($request->input('deleted_pages', '{}'), true);
+        $pageOrderData = json_decode($request->input('page_order', '{}'), true);
+
+        $assignment = Assignment::findOrFail($assignmentId);
         $assignmentName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $assignment->Name);
-    
-        $tempDir  = storage_path("app/temp_submissions/{$customFolder}/{$assignmentName}/");
-        $finalDir = storage_path("app/private/submissions/{$customFolder}/{$assignmentName}/");
-    
+
+        $submission = Submission::findOrFail($submissionId);
+        $submissionfilename = preg_replace('/[^A-Za-z0-9_\-]/', '_', $submission->file_name);
+        $timestamp = date('Ymd_His');
+        $folderName = "{$submissionfilename}_{$timestamp}";
+
+        $tempDir = storage_path("app/temp_submissions/{$customFolder}/{$assignmentName}/");
+        $finalDir = storage_path("app/private/submissions/{$customFolder}/{$assignmentName}/{$folderName}/");
+
         if (!file_exists($tempDir)) {
             Log::error('Temp directory not found', ['tempDir' => $tempDir]);
             return back()->withErrors(['Temporary files not found.']);
         }
         if (!file_exists($finalDir)) {
             mkdir($finalDir, 0755, true);
-            Log::info('Created final directory', ['finalDir' => $finalDir]);
         }
-    
+
         $partFiles = collect(glob($tempDir . 'part*.pdf'))->sort();
-        Log::info('Found part files', ['files' => $partFiles->toArray()]);
-    
+
         foreach ($partFiles as $partPath) {
-            $fileName     = basename($partPath);
-            $tempRelative = str_replace(storage_path('app/') , '', $partPath);
-            $rotations    = $rotationData[$tempRelative] ?? [];
-    
-            Log::info('Processing part', compact('partPath','tempRelative','rotations'));
-    
+            $fileName = basename($partPath);
+            $tempRelative = str_replace(storage_path('app/'), '', $partPath);
+            $rotations = $rotationData[$tempRelative] ?? [];
+            $toDelete = $deletedData[$tempRelative] ?? [];
+            $reorder = $pageOrderData[$tempRelative] ?? [];
+
             if (!empty($rotations)) {
                 // Build "+angle:page1,page2,..." e.g. "+180:1,6"
-                $angle       = intval(reset($rotations));
-                $pages       = implode(',', array_keys($rotations));
+                $angle = intval(reset($rotations));
+                $pages = implode(',', array_keys($rotations));
                 $rotateParam = "+{$angle}:{$pages}";
-    
+
                 $cmd = sprintf(
                     "qpdf --replace-input --rotate=%s %s",
                     escapeshellarg($rotateParam),
                     escapeshellarg($partPath)
                 );
                 exec($cmd, $output, $exitCode);
-                Log::info('Executed qpdf rotation', compact('cmd','exitCode','output'));
-    
-                // remove qpdf backup if created
-                $backup = $partPath . '.~qpdf-orig';
-                if (file_exists($backup)) {
-                    @unlink($backup);
-                    Log::info('Removed qpdf backup', ['backup' => $backup]);
-                }
-    
+
                 if ($exitCode !== 0) {
-                    Log::error('Rotation failed', compact('partPath','rotateParam','exitCode','output'));
-                } else {
-                    Log::info('Rotation succeeded', compact('partPath','rotateParam'));
+                    Log::error('Rotation failed', compact('partPath', 'rotateParam', 'exitCode', 'output'));
                 }
             }
-    
+
+            if (!empty($reorder)) {
+                $orderList = implode(',', array_map('intval', $reorder));
+
+                $cmd = sprintf(
+                    "qpdf --replace-input %s --pages . %s --",
+                    escapeshellarg($partPath),
+                    $orderList
+                );
+                exec($cmd, $outRe, $codeRe);
+            }
+
+            if (!empty($toDelete)) {
+                $excludeFlags = array_map(function ($p) {
+                    return 'x' . intval($p);
+                }, $toDelete);
+                $excludeList = implode(',', $excludeFlags); 
+
+                $cmd = sprintf(
+                    "qpdf --replace-input %s --pages . 1-z,%s --",
+                    escapeshellarg($partPath),
+                    $excludeList
+                );
+
+                exec($cmd, $outDel, $codeDel);
+
+                if ($codeDel !== 0) {
+                    Log::error('qpdf page‑deletion failed', compact('partPath', 'excludeList', 'codeDel', 'outDel'));
+                }
+            }
+
+            $backup = $partPath . '.~qpdf-orig';
+            if (file_exists($backup)) {
+                @unlink($backup);
+            }
             // Move into final storage
             $finalPath = $finalDir . $fileName;
             rename($partPath, $finalPath);
-            Log::info('Moved part to final directory', ['from'=>$partPath,'to'=>$finalPath]);
-    
+
             SplitSubmission::create([
                 'submission_id' => $submissionId,
-                'file_path'     => "private/submissions/{$customFolder}/{$assignmentName}/{$fileName}",
+                'file_path' => "private/submissions/{$customFolder}/{$assignmentName}/{$folderName}/{$fileName}",
             ]);
-            Log::info('Created SplitSubmission record', compact('submissionId','fileName'));
         }
-    
+
         Storage::deleteDirectory("temp_submissions/{$customFolder}/{$assignmentName}");
-        Log::info('Cleaned up temp directory', ['tempDir' => $tempDir]);
-    
+
         $assignment->status = 'Submission Uploaded';
         $assignment->save();
 
-        Log::info('← finalizeSubmission() completed successfully');
         return redirect()
             ->route('assignments.index', session('last_opened_course'))
             ->with('success', 'Final submission saved successfully.');
     }
+
+
+    public function verifyRollNumbers(Assignment $assignment, Submission $submission)
+    {
+        $course = Course::where('course_number', $assignment->course_number)->firstOrFail();
+        $annotation = Assignment_Annotation::where('assignment_id', $assignment->id)
+            ->where('name', 'Roll No')
+            ->firstOrFail();
+
+        $entries = SplitSubmission::where('submission_id', $submission->id)
+            ->get(['id','roll_no','file_path']);
+        
+        $submissionParts = $entries->map(function($split, $idx) use($annotation) {
+            return (object)[
+                'index'       => $idx,
+                'split_id'    => $split->id,
+                'roll_no'    => $split->roll_no,
+                'file_path'   => $split->file_path,
+                'snippetPath' => route('submissions.cropSnippet', [
+                    'path'   => urlencode($split->file_path),
+                    'top'    => $annotation->top,
+                    'left'   => $annotation->left,
+                    'width'  => $annotation->width,
+                    'height' => $annotation->height,
+                    'page'   => 1,
+                ]),
+            ];
+        })->all();
+
+        $students = Student::where('course_id', $course->id)
+            ->select('id', 'sid', 'name', 'email')
+            ->get();
+
+        return view('assignments.verify_roll_numbers', [
+            'assignment' => $assignment,
+            'students' => $students,
+            'submissionParts' => $submissionParts,
+            'course_id' => $course->id,
+        ]);
+    }
+
+    public function cropSnippet(Request $request, string $path)
+    {
+        $page = max(1, intval($request->query('page', 1))) - 1;
+        $top = (int) $request->query('top');
+        $left = (int) $request->query('left');
+        $width = (int) $request->query('width');
+        $height = (int) $request->query('height');
+
+        $fullPdf = storage_path("app/{$path}");
+
+        if (!file_exists($fullPdf)) {
+            abort(404, "PDF not found.");
+        }
+
+        $imagick = new Imagick();
+        $imagick->setResolution(300, 300);
+        $imagick->readImage("{$fullPdf}[{$page}]");
+        $imagick->setImageFormat('png');
+
+        $scale = 300 / 72;
+
+        $imagick->cropImage(
+            $width * $scale,
+            $height * $scale,
+            $left * $scale,
+            $top * $scale
+        );
+        
+        return response($imagick->getImageBlob(), 200)
+            ->header('Content-Type', 'image/png');
+    }
+
+
+    public function storeRollNumbers(Request $request, Assignment $assignment)
+    {
+        $data = $request->validate([
+            'parts'               => 'required|array',
+            'parts.*.split_id'    => 'required|integer|exists:split_submissions,id',
+            'roll_numbers'        => 'required|array',
+        ]);
     
+        foreach ($data['parts'] as $i => $part) {
+            SplitSubmission::where('id', $part['split_id'])
+                ->update(['roll_no' => $data['roll_numbers'][$i] ?? null]);
+        }
     
-
-    // public function verifyRollNumbers($assignmentId)
-    // {
-    //     $assignment = Assignment::findOrFail($assignmentId);
-
-    //     $course = Course::where('course_number', $assignment->course_number)
-    //                     ->firstOrFail();
-
-    //     // Build "CourseCode_Term_Year"
-    //     $baseFolder = preg_replace(
-    //         '/[^A-Za-z0-9_\-]/',
-    //         '_',
-    //         "{$assignment->course_number}_{$course->term}_{$course->year}"
-    //     );
-
-    //     // Sanitize assignment name
-    //     $assignmentName = preg_replace(
-    //         '/[^A-Za-z0-9_\-]/',
-    //         '_',
-    //         $assignment->Name
-    //     );
-
-    //     // Full snippet folder under storage/app/public/temp_snippets/
-    //     $customFolderName = "{$baseFolder}/{$assignmentName}";
-
-    //     // 1) Grab the pending parts from session
-    //     $pending = session('submission_parts', []);
-
-    //     // 2) Fetch assignment & students as before
-    //     $assignment = Assignment::findOrFail($assignmentId);
-    //     $course_id  = session('last_opened_course');
-
-    //     $students = Student::where('course_id', $course_id)
-    //                        ->select('id','sid','name','email')
-    //                        ->get();
-
-    //     // 3) Map each pending part => a structure with an index
-    //     $submissionParts = collect($pending)
-    //         ->map(function($part, $idx) use ($customFolderName) {
-    //             return (object)[
-    //                 // index used for form input names
-    //                 'index'       => $idx,
-    //                 // URL to display the roll-no snippet
-    //                 'snippetPath' => asset('storage/temp_snippets/' . $customFolderName . '/' .$part['snippetFileName']),
-    //                 // original PDF‐chunk path to save later
-    //                 'file_path'   => $part['file_path'],
-    //             ];
-    //         })
-    //         ->toArray();
-
-    //     // 4) Return the view—no DB writes here
-    //     return view('assignments.verify_roll_numbers', [
-    //         'assignment'      => $assignment,
-    //         'students'        => $students,
-    //         'submissionParts' => $submissionParts,
-    //         'course_id'       => $course_id,
-    //     ]);
-    // }
-
-    // public function storeRollNumbers(Request $request, $assignmentId)
-    // {
-    //     $request->validate([
-    //         'roll_numbers' => 'required|array',
-    //     ]);
-
-    //     $pending = session('submission_parts', []);
-
-    //     foreach ($pending as $idx => $part) {
-    //         Submission::create([
-    //             'assignment_id' => $assignmentId,
-    //             'file_path'     => $part['file_path'],
-    //             'roll_no'       => $request->roll_numbers[$idx],
-    //         ]);
-    //     }
-    //     // foreach ($request->roll_numbers as $submissionId => $rollNumber) {
-    //     //     $submission = Submission::findOrFail($submissionId);
-    //     //     $submission->roll_no = $rollNumber;
-    //     //     $submission->save();
-    //     // }
-    //     session()->forget('submission_parts');
-    //     return redirect()->route('assignments.index', session('last_opened_course'))->with('success', 'Roll numbers updated successfully.');
-    // }
+        return redirect()
+            ->route('assignments.index', session('last_opened_course'))
+            ->with('success', 'Roll numbers saved.');
+    }
+    
 
     public function edit($id)
     {
