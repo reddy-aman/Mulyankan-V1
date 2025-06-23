@@ -23,11 +23,19 @@
                                     <img src="{{ $part->snippetPath }}" alt="Roll Number Snippet"
                                         class="border border-gray-300 max-w-full rounded" />
 
-                                    <button type="button"
-                                        class="absolute top-1 right-1 bg-white p-1 rounded-full shadow zoom-full"
-                                        data-path="{{ $part->file_path }}" title="View Full Page">
-                                        <i class="fa fa-search-plus"></i>
-                                    </button>
+                                        @php
+                                            $thumbUrl = route('submissions.thumbnail')
+                                                            . '?path='  . urlencode($part->file_path)
+                                                            . '&page='  . 1
+                                                            . '&size=full';
+                                        @endphp
+                                        <button type="button"
+                                            class="absolute top-1 right-1 bg-white p-1 rounded-full shadow zoom-full"
+                                            data-full-url="{{ $thumbUrl }}"
+                                            title="View Full Page">
+                                            <i class="fa fa-search-plus"></i>
+                                        </button>
+
                                 </div>
 
                                 <div class="flex-1">
@@ -169,10 +177,7 @@
 
             document.querySelectorAll('.zoom-full').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const path = btn.dataset.path;
-                    const url = new URL("{{ route('submissions.thumbnail', '__PATH__') }}".replace('__PATH__', encodeURIComponent(path)), window.location.origin);
-                    url.searchParams.set('page', '1');
-                    url.searchParams.set('size', 'full');
+                    const url = btn.dataset.fullUrl;
 
                     const lightbox = document.getElementById('fullpage-lightbox');
                     const img = document.getElementById('lightbox-img');
@@ -182,7 +187,7 @@
                         img.classList.remove('hidden');
                     };
 
-                    img.src = url.toString();
+                    img.src = url;
                     lightbox.classList.remove('hidden');
                     document.body.style.overflow = 'hidden';
                 });

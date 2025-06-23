@@ -84,14 +84,18 @@ Route::group(['prefix' => 'mulyankan', 'middleware' => 'auth'], function () {
     Route::get('assignments/{assignment}/verify-rolls/{submission}',[AssignmentController::class, 'verifyRollNumbers'])->name('assignments.verifyRollNumbers');
     Route::get('submissions/view/{path}',[AssignmentController::class, 'viewPart'])->name('submissions.viewPart')
       ->where('path', '.*');
-    Route::get('submissions/thumb/{path}',[AssignmentController::class, 'thumbnail'])->name('submissions.thumbnail')
-      ->where('path', '.*');
+    // Route::get('submissions/thumb/{path}',[AssignmentController::class, 'thumbnail'])->name('submissions.thumbnail')
+    //   ->where('path', '.*');
+    Route::get('submissions/thumb', [AssignmentController::class, 'thumbnail'])->name('submissions.thumbnail');
+
     Route::post('/assignments/finalize-submission', [AssignmentController::class, 'finalizeSubmission'])->name('assignments.finalizeSubmission');
     Route::get('assignments/{assignment}/manageSubmission', [AssignmentController::class, 'manageSubmission'])->middleware('role:Instructor|TA')->name('assignments.manageSubmission');
     Route::delete('assignments/{assignment}/submissions/{submission}',[AssignmentController::class, 'destroySubmission'])->name('assignments.destroySubmission');
-    Route::get('submissions/crop-snippet/{path}', [AssignmentController::class, 'cropSnippet'])->where('path', '.*')
-     ->name('submissions.cropSnippet');
+    // Route::get('submissions/crop-snippet/{path}', [AssignmentController::class, 'cropSnippet'])->where('path', '.*')
+    //  ->name('submissions.cropSnippet');
 
+    Route::get('submissions/crop-snippet', [AssignmentController::class, 'cropSnippet'])
+    ->name('submissions.cropSnippet');
 
     //   Route::post('assignments/{assignment}/submit', [AssignmentController::class, 'upload'])->middleware('role:Instructor|TA')->name('assignments.upload');
 

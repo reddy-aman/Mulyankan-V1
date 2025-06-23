@@ -73,16 +73,14 @@
 
                                     <div class="flex space-x-4 overflow-x-auto p-4">
                                         @foreach ($part['pages'] as $page)
-                                                        <div class="relative w-48 h-64 border rounded flex-shrink-0">
-                                                            <img src="{{ route('submissions.thumbnail', [
-                                                'path' => urlencode($part['file_path']),
-                                                'page' => $page,
-                                                'size' => 'full',
-                                            ]) }}" class="submission-thumbnail object-contain w-full h-full" data-full="{{ route('submissions.thumbnail', [
-                                                'path' => urlencode($part['file_path']),
-                                                'page' => $page,
-                                                'size' => 'full',
-                                            ]) }}" alt="Page {{ $page }}">
+                                            <div class="relative w-48 h-64 border rounded flex-shrink-0">
+                                                @php
+                                                    $thumbUrl = route('submissions.thumbnail')
+                                                                . '?path='  . urlencode($part['file_path'])
+                                                                . '&page='  . $page
+                                                                . '&size=full';
+                                                @endphp
+                                                            <img src="{{ $thumbUrl }}" class="submission-thumbnail object-contain w-full h-full" data-full="{{ $thumbUrl }}" alt="Page {{ $page }}">
 
                                                             <button
                                                                 class="absolute top-1 right-1 bg-white text-gray-800 border rounded-full p-1 shadow zoom-in"
@@ -159,8 +157,12 @@
             function openLightboxWithImage(fullUrl) {
                 resetZoomState();
                 zoomedImg.onload = () => {
-                    applyZoom(1);
-                };
+                // center the zoom container on the image
+                const dw = zoomedImg.clientWidth  - zoomContainer.clientWidth;
+                const dh = zoomedImg.clientHeight - zoomContainer.clientHeight;
+                zoomContainer.scrollLeft = dw > 0 ? dw/2 : 0;
+                zoomContainer.scrollTop  = dh > 0 ? dh/2 : 0;
+            };
                 zoomedImg.src = fullUrl;
                 lightbox.classList.remove('hidden');
                 document.body.style.overflow = 'hidden'; // Prevent background scroll

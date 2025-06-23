@@ -91,8 +91,15 @@
                                 data-path="{{ $part['file_path'] }}">
                                 @for ($p = 1; $p <= $part['end_page'] - $part['start_page'] + 1; $p++)
                                     <div class="page-thumb flex-shrink-0 relative w-48 h-64 border rounded p-1"
-                                        data-page="{{ $p }}"> <img
-                                            src="{{ route('submissions.thumbnail', ['path' => urlencode($part['file_path']), 'page' => $p, 'size' => 'full']) }}"
+                                        data-page="{{ $p }}"> 
+                                        @php 
+                                            $thumbUrl = route('submissions.thumbnail')
+                                                        . '?path='  . urlencode($part['file_path'])
+                                                        . '&page='  . $p
+                                                        . '&size=full';
+                                        @endphp
+                                        <img
+                                            src="{{ $thumbUrl }}"
                                             class="submission-thumbnail transition-transform duration-300 ease-in-out"
                                             data-rotation="0" data-path="{{ $part['file_path'] }}" data-page="{{ $p }}" />
 

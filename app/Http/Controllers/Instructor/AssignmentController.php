@@ -477,32 +477,33 @@ class AssignmentController extends Controller
 //     return $response;
 // }
 
-    public function thumbnail(Request $request, string $path)
+    public function thumbnail(Request $request)
     {
-        $page = max(1, intval($request->query('page', 1)));
-        $size = $request->query('size', 'thumb');
+        // pull our PDF path from the query-string:
+        $relative = $request->query('path');
+        $page     = max(1, (int) $request->query('page', 1));
+        $size     = $request->query('size', 'thumb');
 
-        $fullPdf = storage_path("app/{$path}");
-        if (!file_exists($fullPdf)) {
-            abort(404, "PDF not found.");
+        Log::info('Generating thumbnail', compact('relative','page','size'));
+
+        $fullPdf = storage_path("app/{$relative}"); 
+        if (! file_exists($fullPdf)) {
+            abort(404, "PDF not found at {$fullPdf}");
         }
 
-        $im = new Imagick();
-
-        // Higher resolution for full view
+        $im = new \Imagick();
         $im->setResolution(300, 300);
-
-        $im->readImage("{$fullPdf}[" . ($page - 1) . "]");
+        $im->readImage("{$fullPdf}[".($page-1)."]");
         $im->setImageFormat('png');
 
-        // Only scale if it's a thumbnail
         if ($size !== 'full') {
             $im->scaleImage(200, 0);
         }
 
         return response($im->getImageBlob(), 200)
-            ->header('Content-Type', 'image/png');
+            ->header('Content-Type','image/png');
     }
+
 
     public function finalizeSubmission(Request $request)
     {
@@ -625,20 +626,22 @@ class AssignmentController extends Controller
             ->get(['id','roll_no','file_path']);
         
         $submissionParts = $entries->map(function($split, $idx) use($annotation) {
-            return (object)[
-                'index'       => $idx,
-                'split_id'    => $split->id,
-                'roll_no'    => $split->roll_no,
-                'file_path'   => $split->file_path,
-                'snippetPath' => route('submissions.cropSnippet', [
-                    'path'   => urlencode($split->file_path),
-                    'top'    => $annotation->top,
-                    'left'   => $annotation->left,
-                    'width'  => $annotation->width,
-                    'height' => $annotation->height,
-                    'page'   => 1,
-                ]),
-            ];
+                // build a safe query‐string URL
+                $snippetUrl = route('submissions.cropSnippet')
+                   . '?path='   . urlencode($split->file_path)
+                   . '&page=1'
+                   . '&top='    . $annotation->top
+                   . '&left='   . $annotation->left
+                   . '&width='  . $annotation->width
+                   . '&height=' . $annotation->height;
+            
+                return (object)[
+                    'index'       => $idx,
+                    'split_id'    => $split->id,
+                    'roll_no'     => $split->roll_no,
+                    'file_path'   => $split->file_path,
+                    'snippetPath'=> $snippetUrl,
+                ];
         })->all();
 
         $students = Student::where('course_id', $course->id)
@@ -647,19 +650,20 @@ class AssignmentController extends Controller
 
         return view('assignments.verify_roll_numbers', [
             'assignment' => $assignment,
-            'students' => $students,
+            'students' => $students,    
             'submissionParts' => $submissionParts,
             'course_id' => $course->id,
         ]);
     }
 
-    public function cropSnippet(Request $request, string $path)
+    public function cropSnippet(Request $request)
     {
+        $path = $request->query('path');
         $page = max(1, intval($request->query('page', 1))) - 1;
-        $top = (int) $request->query('top');
-        $left = (int) $request->query('left');
-        $width = (int) $request->query('width');
-        $height = (int) $request->query('height');
+        $top = floatval($request->query('top'));
+        $left = floatval($request->query('left'));
+        $width = floatval($request->query('width'));
+        $height = floatval($request->query('height'));
 
         $fullPdf = storage_path("app/{$path}");
 
@@ -674,13 +678,13 @@ class AssignmentController extends Controller
 
         $scale = 300 / 72;
 
-        $imagick->cropImage(
-            $width * $scale,
-            $height * $scale,
-            $left * $scale,
-            $top * $scale
-        );
-        
+        $cropWidth = (int) round($width * $scale);
+        $cropHeight = (int) round($height * $scale);
+        $cropLeft = (int) round($left * $scale);
+        $cropTop = (int) round($top * $scale);
+    
+        $imagick->cropImage($cropWidth, $cropHeight, $cropLeft, $cropTop);
+
         return response($imagick->getImageBlob(), 200)
             ->header('Content-Type', 'image/png');
     }
